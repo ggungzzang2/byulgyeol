@@ -21,8 +21,8 @@ export const PRODUCTS: Product[] = [
     hanja: '人生使用說明書',
     price: 4900,
     originalPrice: 6900,
-    tagline: '성격 · 재물 · 직업의 핵심만',
-    points: ['명궁 주성 심층 해설', '재물을 버는 방식과 새는 지점', '직업 적성 3가지', '올해의 주의 한 가지'],
+    tagline: '명궁 · 배우자상 · 재물 · 진로 핵심만',
+    points: ['명궁 주성 심층 해설', '연애 타입 · 배우자상', '직업 적성 3가지', '돈이 새는 구체적 장면', '올해의 주의 한 가지'],
   },
   {
     id: 'premium',
@@ -74,15 +74,52 @@ export function productOriginalPrice(product: Product, theme: ThemeId): number |
 }
 
 export function productTagline(product: Product, theme: ThemeId): string {
-  if (theme === 'character' && product.id === 'basic') return '연애 · 재물 핵심만, 커피 한 잔 값으로';
+  if (theme === 'character' && product.id === 'basic') return '명궁·연애·재물·진로·배우자상 핵심만, 커피 한 잔 값으로';
   return product.tagline;
 }
 
 export function productPoints(product: Product, theme: ThemeId): string[] {
   if (theme === 'character' && product.id === 'basic') {
-    return ['내 수호별과 성격의 결', '연애에서 반복되는 패턴', '돈이 새는 지점 한 곳', '올해 조심할 별방 하나'];
+    return [
+      '내 수호별과 성격의 결 (명궁)',
+      '끌리는 연애 타입 · 배우자상',
+      '어울리는 진로 · 전공 3가지',
+      '돈이 새는 장면 · 들어오는 경로',
+      '올해 조심할 별방 하나',
+    ];
   }
   return product.points;
+}
+
+/**
+ * 상품 카드에 한 줄로 붙는 포함 범위.
+ * 3,900원 핀셋 리포트와 12,900원 전체 리포트의 경계를 오해 없이 보여주기 위한 문구입니다.
+ */
+export function productScopeShort(product: Product, theme: ThemeId): string | null {
+  const premiumPrice = productPrice(findProduct('premium'), theme).toLocaleString('ko-KR');
+  if (product.id === 'basic') {
+    return `핀셋 리포트 · 12궁 전체·월별 가이드 미포함 (프리미엄 ${premiumPrice}원)`;
+  }
+  if (product.id === 'premium') {
+    return '12궁 전체 + 월별 액션 가이드 12개 포함';
+  }
+  return null;
+}
+
+/** 결제창에 쓰는 포함 범위 설명 (테마별 말투) */
+export function productScopeNote(product: Product, theme: ThemeId): string | null {
+  const premiumPrice = productPrice(findProduct('premium'), theme).toLocaleString('ko-KR');
+  if (product.id === 'basic') {
+    return theme === 'character'
+      ? `명궁·재물·연애·진로·배우자상·돈 새는 장면까지만 핵심으로 짚은 핀셋 리포트야. 12개 별방 전체 해설과 달마다 처방은 '전체 별 이야기'(${premiumPrice}원)에 들어 있어.`
+      : `명궁·재물·연애·진로·배우자상·돈 새는 장면까지만 핵심으로 짚은 핀셋 리포트입니다. 12궁 전체 해설과 월별 가이드는 프리미엄 리포트(${premiumPrice}원)에 포함됩니다.`;
+  }
+  if (product.id === 'premium') {
+    return theme === 'character'
+      ? `12개 별방 전체 해설과 달마다 처방까지 모두 담긴 리포트야. (${premiumPrice}원)`
+      : `12궁 전체 해설과 월별 액션 가이드 12개까지 모두 담긴 리포트입니다. (${premiumPrice}원)`;
+  }
+  return null;
 }
 
 export function productBadge(product: Product, theme: ThemeId): string | undefined {

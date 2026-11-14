@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ChartModel, PalaceView } from '../lib/chart';
 import { buildTeaser, deepProfileOf, palaceScore, profileOf } from '../lib/content';
-import { CHARACTER_FIRST_PRICE, PRODUCTS, productBadge, productPoints, productPrice, productShortCta, productTagline, type ProductId } from '../lib/products';
+import { CHARACTER_FIRST_PRICE, PRODUCTS, productBadge, productPoints, productPrice, productScopeShort, productShortCta, productTagline, type ProductId } from '../lib/products';
 import { buildChartSummaryText } from '../services/aiReport';
 import { STAR_HANJA } from '../lib/terms';
 import { THEME_ART, useTheme } from '../lib/theme';
@@ -585,6 +585,9 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
                     </li>
                   ))}
                 </ul>
+                {productScopeShort(p, theme) && (
+                  <p className="mt-2 text-[10px] leading-[1.65] t-faint">{productScopeShort(p, theme)}</p>
+                )}
                 <div className="mt-4 flex items-center justify-between gap-2">
                   <span className="text-[15px] font-semibold t-title">
                     <span className="num">

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { BirthInput, Gender } from '../lib/chart';
 import type { Product } from '../lib/products';
-import { productPrice, productTagline } from '../lib/products';
+import { productPoints, productPrice, productScopeNote, productTagline } from '../lib/products';
 import { useTheme } from '../lib/theme';
 import { LockIcon } from './ui';
 
@@ -17,7 +17,7 @@ const YEARS = Array.from({ length: 2015 - 1930 + 1 }, (_, i) => 2015 - i);
 export default function CheckoutModal({ product, chartName, onClose, onPaid }: Props) {
   const { theme, copy } = useTheme();
   const isCharacter = theme === 'character';
-  const [agree, setAgree] = useState(true);
+  const [agree, setAgree] = useState(false);
   const [stage, setStage] = useState<'form' | 'processing' | 'done'>('form');
   const [method, setMethod] = useState<'card' | 'kakao' | 'naver'>('card');
 
@@ -130,6 +130,25 @@ export default function CheckoutModal({ product, chartName, onClose, onPaid }: P
               </span>
             </div>
           </div>
+
+          {productScopeNote(product, theme) && (
+            <div className="mt-3 rounded-2xl p-4" style={{ border: '1px dashed var(--line-strong)' }}>
+              <p className="text-[10.5px] font-semibold tracking-[0.06em] t-muted">
+                {isCharacter ? '이 이야기에 담기는 것' : '이 리포트에 담기는 것'}
+              </p>
+              <ul className="mt-2 space-y-1 text-[11.5px] leading-[1.75] t-body">
+                {productPoints(product, theme).map((pt) => (
+                  <li key={pt} className="flex gap-1.5">
+                    <span style={{ color: 'var(--accent)' }}>·</span>
+                    {pt}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2.5 pt-2.5 text-[10.5px] leading-[1.75] t-faint" style={{ borderTop: '1px solid var(--line)' }}>
+                {productScopeNote(product, theme)}
+              </p>
+            </div>
+          )}
 
           {product.id === 'compat' && (
             <div className="mt-4 rounded-2xl p-4" style={{ border: '1px solid var(--line)' }}>

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ChartModel } from '../lib/chart';
 import { buildTeaser, deepProfileOf, monthlyGuide, palaceReadings, palaceScore, profileOf } from '../lib/content';
 import { MUTAGEN_MEANING, PALACES, STAR_HANJA } from '../lib/terms';
-import { buildChartSummaryText, generateAiReport, isAiConfigured, readAiConfig } from '../services/aiReport';
+import { buildChartSummaryText, generateAiReport, isAiConfigured } from '../services/aiReport';
 import { useTheme } from '../lib/theme';
 import { findProduct, productPrice } from '../lib/products';
 import GuardianGoods from './GuardianGoods';
@@ -71,7 +71,6 @@ export default function PremiumReport({ chart, tier, focusAi = false, onBack, on
     error: null,
   });
   const aiReady = isAiConfigured();
-  const config = readAiConfig();
 
   const runAi = async () => {
     setAi({ loading: true, text: null, error: null });
@@ -156,7 +155,7 @@ export default function PremiumReport({ chart, tier, focusAi = false, onBack, on
             <span className="t-chip !text-[10px]">
               {tier === 'premium' ? '프리미엄 12궁 & 운세 풀 리포트' : '내 인생 사용설명서'}
             </span>
-            <span className="t-chip !text-[10px]">v1.0 · 로컬 엔진</span>
+            <span className="t-chip !text-[10px]">정밀 엔진 분석</span>
           </div>
 
           {isCharacter && (
@@ -542,52 +541,33 @@ export default function PremiumReport({ chart, tier, focusAi = false, onBack, on
         {/* 7. AI */}
         <section className="mt-14">
           <div className="t-card p-6 sm:p-8">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[9.5px] tracking-[0.22em]" style={{ color: 'var(--accent-deep)' }}>
-                  BETA · AI 심층 리포트
-                </p>
-                <h3 className="t-title mt-2 text-[19px]">같은 명반을, AI가 다시 씁니다</h3>
-              </div>
-              <button
-                onClick={runAi}
-                disabled={ai.loading}
-                className={`t-btn px-4 py-2.5 text-[11.5px] ${aiReady ? 't-btn-primary' : 't-btn-ghost'}`}
-              >
-                {ai.loading ? '생성 중…' : 'AI로 다시 생성'}
-              </button>
-            </div>
-
+            <p className="text-[9.5px] tracking-[0.22em]" style={{ color: 'var(--accent-deep)' }}>
+              AI 심층 리포트
+            </p>
+            <h3 className="t-title mt-2 text-[19px]">
+              {isCharacter ? '곧, 가디언과 이야기로' : '곧, 대화형 풀이로'}
+            </h3>
             <p className="mt-3 max-w-[620px] text-[11.5px] leading-[1.9] t-muted">
-              현재 화면의 리포트는 명반 계산 결과로 만든 로컬 엔진 버전입니다.{' '}
-              <code className="rounded px-1.5 py-0.5 text-[10.5px]" style={{ background: 'var(--field-bg)' }}>
-                src/services/aiReport.ts
-              </code>{' '}
-              에 프롬프트 빌더와 Gemini·OpenAI·Claude 호출 인터페이스를 준비해 두었습니다. API 키를 연결하면 이 버튼으로
-              실시간 생성 문장을 받아 볼 수 있습니다.
+              {isCharacter
+                ? '현재 가디언 정밀 엔진으로 분석된 리포트예요. 실시간 AI 대화형 풀이는 곧 연결될 예정이에요.'
+                : '현재 정밀 엔진으로 분석된 리포트입니다. 실시간 AI 대화형 풀이는 곧 연결될 예정입니다.'}
             </p>
 
-            <div className="mt-4 rounded-2xl p-4 text-[11px] leading-relaxed" style={{ background: 'var(--field-bg)' }}>
-              <p className="font-semibold t-body">
-                현재 상태: {aiReady ? 'AI 키 감지됨' : 'AI 키 미연결 (로컬 엔진 사용 중)'}
-              </p>
-              {config ? (
-                <p className="num mt-1 t-muted">
-                  provider={config.provider} · model={config.model}
-                </p>
-              ) : (
-                <p className="mt-1 t-muted">
-                  .env.local 에 <code className="rounded px-1" style={{ background: 'var(--card-2)' }}>VITE_AI_PROVIDER</code>,
-                  <code className="ml-1 rounded px-1" style={{ background: 'var(--card-2)' }}>VITE_AI_API_KEY</code> 를 넣으면
-                  자동으로 켜집니다.
-                </p>
-              )}
-              {ai.error && <p className="mt-2" style={{ color: isCharacter ? '#d97d9a' : '#d98a7a' }}>호출 실패: {ai.error}</p>}
-            </div>
-
-            {ai.text && (
-              <div className="mt-5 rounded-2xl p-5" style={{ border: '1px solid var(--line)' }}>
-                <MarkdownLite text={ai.text} />
+            {aiReady && (
+              <div className="mt-4">
+                <button onClick={runAi} disabled={ai.loading} className="t-btn t-btn-primary px-4 py-2.5 text-[11.5px]">
+                  {ai.loading ? '생성 중…' : 'AI로 다시 생성'}
+                </button>
+                {ai.error && (
+                  <p className="mt-2 text-[11.5px]" style={{ color: isCharacter ? '#d97d9a' : '#d98a7a' }}>
+                    잠시 후 다시 시도해 주세요.
+                  </p>
+                )}
+                {ai.text && (
+                  <div className="mt-5 rounded-2xl p-5" style={{ border: '1px solid var(--line)' }}>
+                    <MarkdownLite text={ai.text} />
+                  </div>
+                )}
               </div>
             )}
           </div>

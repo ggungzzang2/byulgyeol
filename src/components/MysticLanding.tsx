@@ -1,5 +1,5 @@
 import type { BirthInput } from '../lib/chart';
-import { PRODUCTS, type ProductId } from '../lib/products';
+import { PRODUCTS, productScopeShort, type ProductId } from '../lib/products';
 import { THEME_ART, useTheme } from '../lib/theme';
 import BirthForm from './BirthForm';
 import { SectionLabel, StarMark } from './ui';
@@ -374,6 +374,12 @@ export default function MysticLanding({ onSubmit, onSample, onProduct }: Props) 
                   </li>
                 ))}
               </ul>
+
+              {productScopeShort(p, 'mystic') && (
+                <p className={`mt-2 text-[10px] leading-[1.65] ${p.recommended ? 't-panel-faint' : 't-faint'}`}>
+                  {productScopeShort(p, 'mystic')}
+                </p>
+              )}
 
               <button
                 onClick={() => onProduct(p.id)}

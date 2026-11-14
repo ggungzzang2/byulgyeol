@@ -7,6 +7,7 @@ import {
   productOriginalPrice,
   productPoints,
   productPrice,
+  productScopeShort,
   productTagline,
   type ProductId,
 } from '../lib/products';
@@ -362,6 +363,14 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
                   </li>
                 ))}
               </ul>
+              {productScopeShort(p, 'character') && (
+                <p
+                  className="mt-2 text-[10px] leading-[1.65]"
+                  style={{ color: p.recommended ? 'rgba(255,249,255,0.62)' : '#a08cbe' }}
+                >
+                  {productScopeShort(p, 'character')}
+                </p>
+              )}
               <button
                 onClick={() => onProduct(p.id)}
                 className={`t-btn mt-4 w-full py-2.5 text-[11.5px] ${p.recommended ? 't-btn-gold' : 't-btn-soft'}`}
@@ -393,7 +402,7 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
             {[
               { q: '태어난 시간을 몰라도 돼?', a: '응! 정오(오시) 기준으로 계산하고, 수호별이 달라질 수 있다는 것도 같이 알려줄게.' },
               { q: '음력 생일인데 그대로 넣어도 돼?', a: '당연하지. 한국 음력 기준으로 양력 변환해서 그리고, 윤달도 선택할 수 있어.' },
-              { q: '결제하면 뭐가 열려?', a: '12개 별방 이야기, 별빛 지수, 올해·10년 흐름, 달마다 하나씩 처방까지 한 번에 열려.' },
+              { q: '결제하면 뭐가 열려?', a: '커피 한 잔 값 이야기(3,900원)는 수호별·성격, 연애·배우자상, 진로·전공, 돈이 새는 장면까지 핵심만 열려. 12개 별방 전체랑 달마다 처방은 전체 별 이야기(12,900원)에서 볼 수 있어.' },
             ].map((f) => (
               <details key={f.q} className="group py-3.5">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[12.5px] font-medium text-[#5b4382]">
