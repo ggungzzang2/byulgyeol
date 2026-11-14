@@ -120,7 +120,7 @@ export default function ChartView({ chart, system, onSystemChange, onReset, onUn
         <SystemTabs
           system={system}
           onChange={onSystemChange}
-          note="지금 보고 있는 체계: 동양 전통 자미두수 · 12궁 명반. 같은 생년월일시로 서양 점성술 천궁도도 볼 수 있어요."
+          note="지금 보고 있는 체계: 동양 전통 자미두수 · 12궁 명반 — 탭을 누르면 서양 점성술로 바뀝니다."
         />
       </div>
 

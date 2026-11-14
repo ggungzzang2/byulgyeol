@@ -67,7 +67,7 @@ export default function WesternView({ model, onSystemChange, onReset, onUnlock }
         <SystemTabs
           system="western"
           onChange={onSystemChange}
-          note="지금 보고 있는 체계: 서양 점성술 · 출생 천궁도(행성 하우스). 같은 입력으로 동양 자미두수 12궁도 볼 수 있어요."
+          note="지금 보고 있는 체계: 서양 점성술 · 출생 천궁도 — 탭을 누르면 동양 자미두수로 바뀝니다."
         />
 
         {/* 태양 · 달 · 어센던트 */}

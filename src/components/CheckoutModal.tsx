@@ -215,7 +215,7 @@ export default function CheckoutModal({ product, chartName, onClose, onPaid, onS
 
           <div className="mt-4 space-y-2 rounded-2xl p-4 text-[12px]" style={{ background: 'var(--field-bg)' }}>
             <div className="flex justify-between gap-3 t-muted">
-              <span>{copy.checkout.order}</span>
+              <span>{lane === 'western' ? '천궁도' : lane === 'both' ? '명반 · 천궁도' : copy.checkout.order}</span>
               <span className="truncate t-body">{chartName || '익명'}</span>
             </div>
             <div className="flex justify-between gap-3 t-muted">

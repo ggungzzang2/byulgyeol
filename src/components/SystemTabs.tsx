@@ -36,9 +36,10 @@ export default function SystemTabs({ system, onChange, note, compact = false }: 
                       boxShadow: '0 12px 26px -22px rgba(0,0,0,0.7)',
                     }
                   : {
-                      background: 'transparent',
-                      border: '1.5px solid var(--line)',
+                      background: 'var(--field-bg)',
+                      border: '1.5px solid var(--line-strong)',
                       color: 'var(--muted)',
+                      opacity: 0.92,
                     }
               }
             >
