@@ -282,8 +282,8 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
                     <img
                       src={guardianArt.image}
                       alt={`${chart.primaryStar}별 가디언 ${guardianArt.name}`}
-                      className="h-[236px] w-full object-cover"
-                      style={{ objectPosition: 'center 26%' }}
+                      className="h-[286px] w-full object-cover"
+                      style={{ objectPosition: 'center 38%' }}
                       loading="lazy"
                     />
                     <div
@@ -301,7 +301,7 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
                     <p className="text-[10px] tracking-[0.18em] t-faint">{chart.primaryStar}별의 가디언</p>
                     <p className="t-title mt-1.5 text-[16px]">
                       {guardianArt.name}
-                      <span className="ml-1.5 text-[11px] font-normal t-muted">{starVisual(chart.primaryStar).mood}</span>
+                      <span className="ml-2 text-[11px] font-normal t-muted">· {starVisual(chart.primaryStar).mood}</span>
                     </p>
                     <p className="mt-1.5 text-[11.5px] leading-[1.8] t-body">{guardianArt.desc}</p>
                   </div>
