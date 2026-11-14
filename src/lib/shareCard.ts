@@ -424,7 +424,7 @@ async function renderCharacter(chart: ChartModel): Promise<string> {
   ctx.fillText(`${STAR_HANJA[chart.primaryStar] ?? ''} · 命宮`, 136, 404);
 
   // 가디언 (오른쪽 위 원형)
-  const img = await loadImage(`${import.meta.env.BASE_URL}art/guardian-bunny.png`);
+  const img = await loadImage(`${import.meta.env.BASE_URL}art/guardian-bunny.webp`);
   if (img) {
     ctx.save();
     ctx.beginPath();

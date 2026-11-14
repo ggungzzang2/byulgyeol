@@ -162,7 +162,7 @@ export default function PremiumReport({ chart, tier, focusAi = false, onBack, on
           {isCharacter && (
             <div className="mt-5 flex items-end gap-2">
               <span className="guardian-avatar h-9 w-9 shrink-0">
-                <img src={`${import.meta.env.BASE_URL}art/guardian-bunny.png`} alt="" className="h-full w-full object-cover" />
+                <img src={`${import.meta.env.BASE_URL}art/guardian-bunny.webp`} alt="" className="h-full w-full object-cover" />
               </span>
               <p className="bubble px-3 py-2 text-[11px] leading-[1.7]">
                 네 별 이야기를 전부 펼쳐봤어. 한 장씩 천천히 읽어봐 ✨

@@ -323,6 +323,6 @@ export function useTheme() {
 const ART = `${import.meta.env.BASE_URL}art/`;
 
 export const THEME_ART: Record<ThemeId, { hero: string; alt: string }> = {
-  mystic: { hero: `${ART}mystic-card.png`, alt: '금박 성좌가 빛나는 자미두수 타로 카드' },
-  character: { hero: `${ART}guardian-bunny.png`, alt: '별 구슬을 안고 있는 파스텔 수호 토끼' },
+  mystic: { hero: `${ART}mystic-card.webp`, alt: '금박 성좌가 빛나는 자미두수 타로 카드' },
+  character: { hero: `${ART}guardian-bunny.webp`, alt: '별 구슬을 안고 있는 파스텔 수호 토끼' },
 };
