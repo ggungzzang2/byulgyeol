@@ -26,7 +26,7 @@ export default function SystemTabs({ system, onChange, note, compact = false }: 
               role="tab"
               aria-selected={active}
               onClick={() => onChange(id)}
-              className="relative flex items-start gap-2 rounded-2xl px-3 py-3 text-left transition"
+              className="relative flex items-stretch gap-2 rounded-2xl px-2.5 py-2.5 text-left transition"
               style={
                 active
                   ? {
@@ -43,7 +43,7 @@ export default function SystemTabs({ system, onChange, note, compact = false }: 
               }
             >
               <span
-                className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[13px]"
+                className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px]"
                 style={{
                   background: active ? 'var(--accent)' : 'var(--field-bg)',
                   color: active ? 'var(--on-accent)' : 'var(--accent)',
@@ -52,24 +52,24 @@ export default function SystemTabs({ system, onChange, note, compact = false }: 
               >
                 {s.glyph}
               </span>
-              <span className="min-w-0">
-                <span className="block truncate text-[12px] font-semibold">{s.tab}</span>
-                <span className="mt-0.5 block text-[9.5px] leading-tight" style={{ color: active ? 'var(--accent-deep)' : 'var(--faint)' }}>
+              <span className="min-w-0 flex-1">
+                <span
+                  className="block text-[11px] font-semibold leading-[1.35]"
+                  style={{ color: active ? 'var(--accent-deep)' : 'var(--text-2, var(--muted))' }}
+                >
+                  {s.tab}
+                </span>
+                <span className="mt-1 block text-[9px] leading-[1.4]" style={{ color: 'var(--faint)' }}>
                   {s.basis}
                 </span>
               </span>
-              {active && (
-                <span className="absolute right-2 top-2 text-[9px]" style={{ color: 'var(--accent-deep)' }} aria-hidden="true">
-                  ●
-                </span>
-              )}
             </button>
           );
         })}
       </div>
       <p className="mt-2 px-1 text-[10px] leading-[1.7]" style={{ color: 'var(--faint)' }}>
         {note ??
-          '동양 자미두수(12궁 명반·14주성)와 서양 점성술(출생 천궁도·행성 하우스)은 계산 방식도 해석도 완전히 다른 두 체계예요. 고른 체계만 아래에 나옵니다.'}
+          '두 체계는 계산 방식도 해석도 완전히 다른 별개의 서비스예요. 고른 체계만 아래에 나옵니다.'}
       </p>
     </div>
   );

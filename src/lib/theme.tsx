@@ -137,7 +137,7 @@ const MYSTIC: ThemeCopy = {
     teaserCta: '잠금 해제하고 전체 보기',
     teaserNote:
       '왜 그런지, 언제인지, 무엇을 하면 되는지는 프리미엄 리포트에서 12궁 전체로 이어집니다.',
-    productsSection: '리포트 3종',
+    productsSection: '리포트 5종',
     save: '이미지 저장',
     saveBusy: '만드는 중…',
     share: '공유하기',
@@ -229,7 +229,7 @@ const CHARACTER: ThemeCopy = {
     teaserSub: '아직 안 알려준 이야기',
     teaserCta: '전체 별 이야기 열기',
     teaserNote: '왜 그런지, 언제인지, 뭘 하면 좋은지는 전체 이야기에서 12개 별방으로 이어져.',
-    productsSection: '별 이야기 3종',
+    productsSection: '별 이야기 5종',
     save: '카드 저장',
     saveBusy: '그리는 중…',
     share: '공유하기',

@@ -204,13 +204,13 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct, system
 
             <div className="mt-4 grid grid-cols-3 gap-1.5 border-t pt-3" style={{ borderColor: 'rgba(146,116,192,0.12)' }}>
               {[
-                { icon: '💗', label: '연애의 별', value: 80 },
-                { icon: '💰', label: '금전의 별', value: 70 },
-                { icon: '🍀', label: '일의 별', value: 75 },
+                { glyph: '✦', color: '#e58aa6', label: '연애의 별', value: 80 },
+                { glyph: '✦', color: '#d9a441', label: '금전의 별', value: 70 },
+                { glyph: '✦', color: '#7b8fd6', label: '일의 별', value: 75 },
               ].map((s) => (
                 <div key={s.label} className="text-center">
-                  <span className="text-[15px]" aria-hidden="true">
-                    {s.icon}
+                  <span className="text-[13px]" style={{ color: s.color }} aria-hidden="true">
+                    {s.glyph}
                   </span>
                   <p className="mt-0.5 text-[9.5px] text-[#907da9]">{s.label}</p>
                   <p className="num text-[12px] font-semibold text-[#6b4fa0]">{s.value}%</p>
