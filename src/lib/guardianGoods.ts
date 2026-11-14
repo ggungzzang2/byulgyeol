@@ -87,11 +87,9 @@ function chartElement(chart: ChartModel): ElementKey {
 /** 가장 낮은 궁 지수 → 보완할 기운 */
 export function guardianRecommendation(chart: ChartModel, theme: 'mystic' | 'character'): GuardianRecommendation {
   const areas = [
-    { name: '재물', palace: '재백궁', element: '금' as ElementKey, score: palaceScore(chart.palaces.find((p) => p.name === '재백궁')) },
+    { name: '금전', palace: '재백궁', element: '금' as ElementKey, score: palaceScore(chart.palaces.find((p) => p.name === '재백궁')) },
     { name: '연애', palace: '부처궁', element: '화' as ElementKey, score: palaceScore(chart.palaces.find((p) => p.name === '부처궁')) },
     { name: '일', palace: '관록궁', element: '목' as ElementKey, score: palaceScore(chart.palaces.find((p) => p.name === '관록궁')) },
-    { name: '건강', palace: '질액궁', element: '수' as ElementKey, score: palaceScore(chart.palaces.find((p) => p.name === '질액궁')) },
-    { name: '마음의 여유', palace: '복덕궁', element: '토' as ElementKey, score: palaceScore(chart.palaces.find((p) => p.name === '복덕궁')) },
   ].sort((a, b) => a.score - b.score);
 
   const weakest = areas[0];
