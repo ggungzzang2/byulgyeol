@@ -335,7 +335,7 @@ export default function WesternView({ model, onSystemChange, onReset, onUnlock }
 
         {/* 서양 상품 */}
         <section className="mt-12">
-          <SectionLabel index="REPORTS">WESTERN REPORTS</SectionLabel>
+          <SectionLabel index="✶">WESTERN REPORTS</SectionLabel>
           <h2 className="t-display mt-3 text-[22px]">서양 점성술 리포트</h2>
           <p className="mt-2 text-[11.5px] t-muted">
             아래 두 상품은 서양 점성술 동선입니다. 자미두수 리포트는 위쪽 ‘동양 자미두수’ 탭에서 결제할 수 있어요.
