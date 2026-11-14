@@ -9,7 +9,7 @@
  */
 import type { ChartModel } from '../lib/chart';
 import { palaceScore, profileOf } from '../lib/content';
-import { drawStarEmblem, starVisual } from '../lib/starPalette';
+import { DEFAULT_GUARDIAN_IMAGE, drawStarEmblem, starVisual } from '../lib/starPalette';
 import { STAR_HANJA } from '../lib/terms';
 import type { ThemeId } from '../lib/theme';
 
@@ -130,11 +130,21 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-function loadImage(src: string): Promise<HTMLImageElement | null> {
+function loadImage(src: string, fallback?: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
+    img.onerror = () => {
+      if (!fallback) {
+        resolve(null);
+        return;
+      }
+      // 주성별 일러스트를 못 불러오면 공용 가디언으로 대체한다
+      const alt = new Image();
+      alt.onload = () => resolve(alt);
+      alt.onerror = () => resolve(null);
+      alt.src = fallback;
+    };
     img.src = src;
   });
 }
@@ -530,7 +540,7 @@ async function renderCharacter(chart: ChartModel): Promise<string> {
   ctx.fillStyle = halo;
   ctx.fillRect(W / 2 - 340, archY - 300, 680, archH + 420);
 
-  const img = await loadImage(`${import.meta.env.BASE_URL}art/guardian-bunny.webp`);
+  const img = await loadImage(starVisual(chart.primaryStar).guardianImage, DEFAULT_GUARDIAN_IMAGE);
   if (img) {
     ctx.save();
     archPath(ctx, archX, archY, archW, archH);
@@ -556,6 +566,12 @@ async function renderCharacter(chart: ChartModel): Promise<string> {
     ctx.lineWidth = 1.4;
     archPath(ctx, archX - 12, archY - 12, archW + 24, archH + 24);
     ctx.stroke();
+
+    // 아치 창 아래 — 주성 전용 가디언 이름
+    ctx.textAlign = 'center';
+    ctx.fillStyle = hexToRgba(v.light, 0.94);
+    ctx.font = `400 24px ${ROUND}`;
+    drawTracked(ctx, `수호 가디언 · ${v.guardianName}`, W / 2, archY + archH - 20, 4, 'center');
   }
 
   // 아치 위 작은 문양

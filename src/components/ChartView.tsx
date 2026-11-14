@@ -6,7 +6,7 @@ import { STAR_HANJA } from '../lib/terms';
 import { THEME_ART, useTheme } from '../lib/theme';
 import { guardianRecommendation } from '../lib/guardianGoods';
 import { downloadDataUrl, renderShareCard } from '../lib/shareCard';
-import { starGlowStyle, starVisual } from '../lib/starPalette';
+import { starGlowStyle, starGuardian, starVisual } from '../lib/starPalette';
 import StarEmblem from './StarEmblem';
 import ChartBoard from './ChartBoard';
 import PalaceDetail from './PalaceDetail';
@@ -28,6 +28,7 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
   const profile = profileOf(chart.primaryStar);
   const deep = deepProfileOf(chart.primaryStar);
   const guardian = guardianRecommendation(chart, theme);
+  const guardianArt = starGuardian(chart.primaryStar);
   const teaser = buildTeaser(chart);
 
   const pick = (name: string) => palaceScore(chart.palaces.find((p) => p.name === name));
@@ -154,7 +155,7 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
                 {isCharacter && (
                   <div className="mt-4 flex items-end gap-2">
                     <span className="guardian-avatar h-10 w-10 shrink-0">
-                      <img src={THEME_ART.character.hero} alt="" className="h-full w-full object-cover" />
+                      <img src={guardianArt.image} alt={`${chart.primaryStar}별 가디언 ${guardianArt.name}`} className="h-full w-full object-cover" />
                     </span>
                     <p className="flex-1 rounded-2xl rounded-bl-md px-3 py-2 text-[11px] leading-[1.65]" style={{ background: 'rgba(255,255,255,0.92)', color: '#5b4382' }}>
                       {copy.chart.soulBubble(chart.primaryStar)}
@@ -273,8 +274,39 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
               </div>
             </div>
 
-            {/* 오른쪽: 지수(미스틱) + 올해 */}
+            {/* 오른쪽: 수호별 가디언(캐릭터) + 올해 */}
             <div className="flex flex-col gap-4">
+              {isCharacter && (
+                <div className="t-card overflow-hidden" style={{ padding: 0 }}>
+                  <div className="relative">
+                    <img
+                      src={guardianArt.image}
+                      alt={`${chart.primaryStar}별 가디언 ${guardianArt.name}`}
+                      className="h-[236px] w-full object-cover"
+                      style={{ objectPosition: 'center 26%' }}
+                      loading="lazy"
+                    />
+                    <div
+                      className="pointer-events-none absolute inset-0"
+                      style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 52%, var(--card) 100%)' }}
+                    />
+                    <div
+                      className="absolute left-4 top-4 rounded-full px-2.5 py-1 text-[9px] tracking-[0.18em]"
+                      style={{ background: 'rgba(255,255,255,0.8)', color: '#6b4f92' }}
+                    >
+                      GUARDIAN · 수호별
+                    </div>
+                  </div>
+                  <div className="relative px-5 pb-5 pt-0.5">
+                    <p className="text-[10px] tracking-[0.18em] t-faint">{chart.primaryStar}별의 가디언</p>
+                    <p className="t-title mt-1.5 text-[16px]">
+                      {guardianArt.name}
+                      <span className="ml-1.5 text-[11px] font-normal t-muted">{starVisual(chart.primaryStar).mood}</span>
+                    </p>
+                    <p className="mt-1.5 text-[11.5px] leading-[1.8] t-body">{guardianArt.desc}</p>
+                  </div>
+                </div>
+              )}
               {!isCharacter && (
                 <div className="t-card p-5 sm:p-6">
                   <p className="text-[10px] tracking-[0.18em] t-faint">{copy.chart.numbersTitle}</p>

@@ -28,7 +28,19 @@ export type StarVisual = {
   /** 카드 프레임 (금박 or 라벤더) */
   frame: string;
   emblem: EmblemPrim[];
+  /** 주성 전용 가디언 일러스트 경로 (public/guardians/*.webp) */
+  guardianImage: string;
+  /** 가디언 캐릭터 이름 */
+  guardianName: string;
+  /** 가디언 한 줄 소개 */
+  guardianDesc: string;
 };
+
+/** 주성별 가디언 일러스트 폴더 (GitHub Pages 서브경로 배포 대응) */
+const GUARDIAN_ART = `${import.meta.env.BASE_URL}guardians/`;
+
+/** 주성과 무관한 자리(헤더 로고 등)에 쓰는 공용 가디언 — 별 구슬을 안은 파스텔 토끼 */
+export const DEFAULT_GUARDIAN_IMAGE = `${import.meta.env.BASE_URL}art/guardian-bunny.webp`;
 
 /* ---------------------------------------------------------- 문양 생성기 */
 function radialPath(count: number, inner: number, outer: number, offsetDeg = 0, tip = 0): string {
@@ -170,6 +182,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#F6D9A8',
     frame: 'rgba(246,216,168,0.82)',
     emblem: EMBLEM.crown,
+    guardianImage: `${GUARDIAN_ART}jami.webp`,
+    guardianName: '루미',
+    guardianDesc: '작은 왕관을 쓴 아기 사자. 네 안의 품위와 중심을 지켜줘.',
   },
   천기: {
     hanja: '天機',
@@ -181,6 +196,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#C9ECFF',
     frame: 'rgba(200,235,255,0.7)',
     emblem: EMBLEM.compass,
+    guardianImage: `${GUARDIAN_ART}cheongi.webp`,
+    guardianName: '리브',
+    guardianDesc: '나침반을 든 여우. 헷갈리는 밤에도 갈 길을 짚어줘.',
   },
   태양: {
     hanja: '太陽',
@@ -192,6 +210,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#FFD49A',
     frame: 'rgba(255,214,160,0.85)',
     emblem: EMBLEM.sun,
+    guardianImage: `${GUARDIAN_ART}taeyang.webp`,
+    guardianName: '솔',
+    guardianDesc: '태양 구슬을 안은 고양이. 네 하루를 환하게 데워줘.',
   },
   무곡: {
     hanja: '武曲',
@@ -203,6 +224,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#F7DFA4',
     frame: 'rgba(247,223,164,0.8)',
     emblem: EMBLEM.coin,
+    guardianImage: `${GUARDIAN_ART}mugok.webp`,
+    guardianName: '코코',
+    guardianDesc: '금화를 굴리는 다람쥐. 네 손에 남는 것을 함께 세어줘.',
   },
   천동: {
     hanja: '天同',
@@ -214,6 +238,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#CFF6EA',
     frame: 'rgba(207,246,234,0.72)',
     emblem: EMBLEM.lotus,
+    guardianImage: `${GUARDIAN_ART}cheondong.webp`,
+    guardianName: '연',
+    guardianDesc: '연꽃 위에 앉은 수달. 오늘은 쉬어도 괜찮다고 말해줘.',
   },
   염정: {
     hanja: '廉貞',
@@ -225,6 +252,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#FFC6C0',
     frame: 'rgba(255,198,192,0.75)',
     emblem: EMBLEM.flame,
+    guardianImage: `${GUARDIAN_ART}yeomjeong.webp`,
+    guardianName: '루즈',
+    guardianDesc: '장미빛 불꽃을 쥔 레서판다. 네 열정을 예쁘게 태워줘.',
   },
   천부: {
     hanja: '天府',
@@ -236,6 +266,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#F3DCA6',
     frame: 'rgba(243,220,166,0.8)',
     emblem: EMBLEM.treasury,
+    guardianImage: `${GUARDIAN_ART}cheonbu.webp`,
+    guardianName: '보미',
+    guardianDesc: '보물 주머니를 안은 고슴도치. 네 곳간을 포근히 지켜줘.',
   },
   태음: {
     hanja: '太陰',
@@ -247,6 +280,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#DCEAFF',
     frame: 'rgba(220,234,255,0.75)',
     emblem: EMBLEM.crescent,
+    guardianImage: `${GUARDIAN_ART}taeeum.webp`,
+    guardianName: '루나',
+    guardianDesc: '초승달을 품은 은빛 토끼. 네 마음을 조용히 비춰줘.',
   },
   탐랑: {
     hanja: '貪狼',
@@ -258,6 +294,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#FFD1EC',
     frame: 'rgba(255,209,236,0.75)',
     emblem: EMBLEM.rosette,
+    guardianImage: `${GUARDIAN_ART}tamnang.webp`,
+    guardianName: '피치',
+    guardianDesc: '복숭아꽃을 든 아기 사슴. 네 매력을 알고 쓰게 해줘.',
   },
   거문: {
     hanja: '巨門',
@@ -269,6 +308,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#E6E2F5',
     frame: 'rgba(230,226,245,0.7)',
     emblem: EMBLEM.gate,
+    guardianImage: `${GUARDIAN_ART}geomun.webp`,
+    guardianName: '그레이',
+    guardianDesc: '별빛 문 앞의 고양이. 하고 싶은 말을 또박또박 꺼내게 해줘.',
   },
   천상: {
     hanja: '天相',
@@ -280,6 +322,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#F2E3C2',
     frame: 'rgba(242,227,194,0.75)',
     emblem: EMBLEM.scale,
+    guardianImage: `${GUARDIAN_ART}cheonsang.webp`,
+    guardianName: '세라',
+    guardianDesc: '황금 저울을 든 백조. 네 균형을 고르게 잡아줘.',
   },
   천량: {
     hanja: '天梁',
@@ -291,6 +336,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#EDE6C6',
     frame: 'rgba(237,230,198,0.72)',
     emblem: EMBLEM.mountain,
+    guardianImage: `${GUARDIAN_ART}cheonryang.webp`,
+    guardianName: '포레',
+    guardianDesc: '나뭇잎 망토의 아기 사슴. 지친 네 등 뒤를 받쳐줘.',
   },
   칠살: {
     hanja: '七殺',
@@ -302,6 +350,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#FFD6C8',
     frame: 'rgba(255,214,200,0.75)',
     emblem: EMBLEM.sword,
+    guardianImage: `${GUARDIAN_ART}chilsal.webp`,
+    guardianName: '카이',
+    guardianDesc: '수정 검을 든 아기 늑대. 네 앞길을 과감하게 열어줘.',
   },
   파군: {
     hanja: '破軍',
@@ -313,6 +364,9 @@ export const STAR_VISUAL: Record<string, StarVisual> = {
     accent: '#DBDFFF',
     frame: 'rgba(219,223,255,0.75)',
     emblem: EMBLEM.burst,
+    guardianImage: `${GUARDIAN_ART}pagun.webp`,
+    guardianName: '마루',
+    guardianDesc: '별빛 파도를 타는 바다수달. 판을 바꿀 용기를 건네줘.',
   },
 };
 
@@ -324,6 +378,12 @@ export function starVisual(star: string): StarVisual {
 
 export function starMood(star: string): string {
   return starVisual(star).mood;
+}
+
+/** 주성 전용 가디언 — 일러스트·이름·소개를 한 번에 */
+export function starGuardian(star: string): { image: string; name: string; desc: string } {
+  const v = starVisual(star);
+  return { image: v.guardianImage, name: v.guardianName, desc: v.guardianDesc };
 }
 
 /** 웹 패널용 — 주성 색으로 은은하게 물들인 배경 */
