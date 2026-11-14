@@ -1,24 +1,12 @@
-import { useState } from 'react';
 import type { ChartModel } from '../lib/chart';
+import { useState } from 'react';
 import { useTheme } from '../lib/theme';
-import { buildChartSummaryText } from '../services/aiReport';
 import { SectionLabel } from './ui';
 
 export default function MonthlyUpsell({ chart }: { chart: ChartModel }) {
   const { theme } = useTheme();
   const isCharacter = theme === 'character';
-  const [copied, setCopied] = useState(false);
   const [joined, setJoined] = useState(false);
-
-  const copyPrompt = async () => {
-    try {
-      await navigator.clipboard.writeText(buildChartSummaryText(chart));
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2400);
-    } catch {
-      setCopied(false);
-    }
-  };
 
   return (
     <section id="next" className="mt-14 scroll-mt-24">
@@ -101,16 +89,16 @@ export default function MonthlyUpsell({ chart }: { chart: ChartModel }) {
 
             <div className="mt-4 rounded-xl p-3" style={{ background: 'rgba(9,8,18,0.28)', border: '1px solid var(--panel-rule)' }}>
               <p className="text-[10px] leading-[1.7] t-panel-faint">
-                지금도 내 명반 데이터를 AI 프롬프트로 한 번에 복사해 다른 AI에서 시험해 볼 수 있습니다.
+                동양 12궁과 서양 출생 차트를 함께 읽는 통합 리포트는 준비가 끝나는 대로 이 자리에서 열립니다.
               </p>
             </div>
 
-            <button onClick={copyPrompt} className="t-btn t-btn-gold mt-auto w-full py-2.5 text-[11.5px] !mt-4">
-              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7">
-                <rect x="9" y="9" width="11" height="11" rx="2" />
-                <path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
-              </svg>
-              {copied ? 'AI 프롬프트 복사됨 ✓' : '내 명반 AI 프롬프트 원클릭 복사'}
+            <button
+              onClick={() => setJoined(true)}
+              disabled={joined}
+              className={`t-btn mt-auto w-full py-2.5 text-[11.5px] !mt-4 ${joined ? 't-btn-soft' : 't-btn-gold'}`}
+            >
+              {joined ? '대기 명단 등록됨 ✓' : '통합 리포트 대기 명단 등록'}
             </button>
           </div>
         </div>

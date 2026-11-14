@@ -86,34 +86,6 @@ export function chartToPromptText(chart: ChartModel): string {
   ].join('\n');
 }
 
-/**
- * 무료 결과 화면의 '내 명반 요약 텍스트 복사' 버튼이 담는 텍스트.
- * fate.windada.com 명반을 ChatGPT/제미나이에 붙여넣는 흐름을 앱 안에서 끝내기 위한 것.
- */
-export function buildChartSummaryText(chart: ChartModel): string {
-  const deep = deepProfileOf(chart.primaryStar);
-  const scores = {
-    재물: palaceScore(chart.palaces.find((p) => p.name === '재백궁')),
-    연애: palaceScore(chart.palaces.find((p) => p.name === '부처궁')),
-    직업: palaceScore(chart.palaces.find((p) => p.name === '관록궁')),
-    건강: palaceScore(chart.palaces.find((p) => p.name === '질액궁')),
-  };
-  return [
-    '[자미두수 명반 요약]',
-    chartToPromptText(chart),
-    '',
-    `[지수] 재물 ${scores.재물} · 연애 ${scores.연애} · 직업 ${scores.직업} · 건강 ${scores.건강}`,
-    '',
-    '[부탁]',
-    '위 명반을 바탕으로 아래를 구체적으로 해석해줘.',
-    '1) 어울리는 진로·전공·직업군 (실제 학과명과 직함으로)',
-    '2) 끌리는 연애 타입과 배우자상 (첫인상·직업·만나는 장소)',
-    '3) 돈이 새는 구체적 상황과 재물이 들어오는 경로 (금액대 포함)',
-    '4) 올해 결정해야 할 것 3가지',
-    '추상적인 미사여구 대신 실제 장면과 명칭으로 써줘.',
-  ].join('\n');
-}
-
 /** 티어별 요청 사항 */
 const TIER_TASK: Record<ReportTier, string> = {
   basic:

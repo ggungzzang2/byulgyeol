@@ -67,7 +67,7 @@ function CharacterHeader() {
             ✦
           </span>
         </a>
-        <nav className="hidden items-center gap-6 text-[12px] text-[#8a78a6] sm:flex">
+        <nav className="hidden items-center gap-6 text-[12px] text-[#6a5788] sm:flex">
           <a href="#chart">내 별</a>
           <a href="#collection">별 컬렉션</a>
           <a href="#reports">별 이야기</a>
@@ -87,7 +87,7 @@ function LuckRing({ score }: { score: number }) {
       style={{ background: `conic-gradient(#9470e4 ${score * 3.6}deg, rgba(146,116,192,0.14) 0deg)` }}
     >
       <div className="flex h-full w-full flex-col items-center justify-center rounded-full bg-white">
-        <span className="text-[9px] text-[#a08cbe]">행운지수</span>
+        <span className="text-[9px] text-[#75628f]">행운지수</span>
         <span className="num text-[26px] font-bold leading-none text-[#5b4382]">{score}%</span>
       </div>
     </div>
@@ -167,11 +167,11 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
           <div className="t-card relative mt-6 p-5 animate-rise [animation-delay:180ms] sm:p-6">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[10px] tracking-[0.18em] text-[#a08cbe]">TODAY · 오늘의 별빛</p>
+                <p className="text-[10px] tracking-[0.18em] text-[#75628f]">TODAY · 오늘의 별빛</p>
                 <h2 className="t-display mt-1.5 truncate text-[17px] text-[#4d3a6d]">
                   <span aria-hidden="true">🌟</span> 작은 선택이 큰 변화를 가져와
                 </h2>
-                <p className="mt-2 text-[11.5px] leading-[1.8] text-[#8a78a6]">
+                <p className="mt-2 text-[11.5px] leading-[1.8] text-[#6a5788]">
                   새로운 시도를 두려워하지 마.
                   <br />
                   네 직감이 좋은 길로 이끌어 줄 거야.
@@ -197,7 +197,7 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
               ))}
             </div>
 
-            <p className="mt-3 rounded-xl px-3 py-2 text-[10.5px] leading-relaxed text-[#8a78a6]" style={{ background: 'rgba(237,227,255,0.6)' }}>
+            <p className="mt-3 rounded-xl px-3 py-2 text-[10.5px] leading-relaxed text-[#6a5788]" style={{ background: 'rgba(237,227,255,0.6)' }}>
               ✧ 위 숫자는 예시야. 생년월일을 알려주면 <b className="text-[#6b4fa0]">너의 별로 다시 계산</b>해 줄게!
             </p>
           </div>
@@ -211,7 +211,7 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
             <SectionLabel index="✧">STAR COLLECTION</SectionLabel>
             <h2 className="t-display mt-3 text-[21px] text-[#4d3a6d]">나의 별 컬렉션</h2>
           </div>
-          <span className="hidden text-[11px] text-[#a08cbe] sm:block">별지도를 열면 하나씩 모을 수 있어</span>
+          <span className="hidden text-[11px] text-[#75628f] sm:block">별지도를 열면 하나씩 모을 수 있어</span>
         </div>
 
         <div className="mt-4 grid grid-cols-5 gap-2 sm:gap-3">
@@ -265,7 +265,7 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
               <br />
               <span className="text-[#8f6fe0]">네가 태어난 순간</span>만 알려줘.
             </h2>
-            <p className="mt-3 max-w-[320px] text-[12px] leading-[1.9] text-[#8a78a6]">
+            <p className="mt-3 max-w-[320px] text-[12px] leading-[1.9] text-[#6a5788]">
               양력·음력, 윤달, 태어난 시간까지 보정해서 그려. 시간을 몰라도 괜찮아 — 정오 기준으로 별을 놓아줄게.
             </p>
             <div className="mt-5 space-y-2.5">
@@ -297,7 +297,7 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
             </span>
             <div>
               <p className="t-display text-[14px] text-[#4d3a6d]">내일의 운세도 궁금하다면?</p>
-              <p className="mt-0.5 text-[11px] text-[#8a78a6]">행운이 가득한 하루를 미리 준비해 보세요.</p>
+              <p className="mt-0.5 text-[11px] text-[#6a5788]">행운이 가득한 하루를 미리 준비해 보세요.</p>
             </div>
           </div>
           <a href="#chart" className="t-btn t-btn-primary w-full px-5 py-3 text-[12px] sm:w-auto">
@@ -311,7 +311,7 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
       <section id="reports" className="mx-auto mt-14 max-w-5xl scroll-mt-20 px-5 sm:px-8">
         <SectionLabel index="✧">STORY BOOKS</SectionLabel>
         <h2 className="t-display mt-3 text-[23px] text-[#4d3a6d]">별 이야기 세 권</h2>
-        <p className="mt-2 max-w-[340px] text-[12px] leading-[1.9] text-[#8a78a6]">
+        <p className="mt-2 max-w-[340px] text-[12px] leading-[1.9] text-[#6a5788]">
           첫 이야기는 <b className="font-semibold text-[#7c59cf]">커피 한 잔 값({CHARACTER_FIRST_PRICE.toLocaleString('ko-KR')}원)</b>이야.
           가볍게 시작하고, 더 궁금할 때만 다음 책을 펼쳐.
         </p>
@@ -337,17 +337,17 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
               )}
               <div className="flex items-baseline justify-between gap-2">
                 <h3 className="t-display text-[14.5px] leading-snug">{p.name}</h3>
-                <span className="text-[9px]" style={{ color: p.recommended ? 'rgba(255,249,255,0.5)' : '#b6a9c9' }}>
+                <span className="text-[9px]" style={{ color: p.recommended ? 'rgba(255,249,255,0.72)' : '#8f81a8' }}>
                   {p.hanja}
                 </span>
               </div>
-              <p className="mt-1.5 text-[11px]" style={{ color: p.recommended ? 'rgba(255,249,255,0.75)' : '#8a78a6' }}>
+              <p className="mt-1.5 text-[11px]" style={{ color: p.recommended ? 'rgba(255,249,255,0.88)' : '#6a5788' }}>
                 {productTagline(p, 'character')}
               </p>
               <div className="mt-4 flex items-baseline gap-1.5">
                 <span className="num text-[21px] font-bold">{productPrice(p, 'character').toLocaleString('ko-KR')}원</span>
                 {productOriginalPrice(p, 'character') && (
-                  <span className="num text-[10px] line-through" style={{ color: p.recommended ? 'rgba(255,249,255,0.45)' : '#b6a9c9' }}>
+                  <span className="num text-[10px] line-through" style={{ color: p.recommended ? 'rgba(255,249,255,0.8)' : '#8f81a8' }}>
                     {productOriginalPrice(p, 'character')!.toLocaleString('ko-KR')}원
                   </span>
                 )}
@@ -366,7 +366,7 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
               {productScopeShort(p, 'character') && (
                 <p
                   className="mt-2 text-[10px] leading-[1.65]"
-                  style={{ color: p.recommended ? 'rgba(255,249,255,0.62)' : '#a08cbe' }}
+                  style={{ color: p.recommended ? 'rgba(255,249,255,0.8)' : '#75628f' }}
                 >
                   {productScopeShort(p, 'character')}
                 </p>
@@ -380,11 +380,11 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
             </div>
           ))}
         </div>
-        <p className="mt-4 text-center text-[10.5px] text-[#a08cbe]">
+        <p className="mt-4 text-center text-[10.5px] text-[#75628f]">
           1회 결제 · 언제든 다시 보기 · 별지도는 서버에 저장하지 않아
         </p>
         <div className="mt-3 rounded-2xl px-4 py-3 text-center" style={{ background: 'rgba(255,255,255,0.7)', border: '1px dashed rgba(146,116,192,0.25)' }}>
-          <p className="text-[10.5px] leading-[1.8] text-[#8a78a6]">
+          <p className="text-[10.5px] leading-[1.8] text-[#6a5788]">
             곧 · <b className="text-[#7c59cf]">매달 1일 월간 별빛 편지</b>(구독)와{' '}
             <b className="text-[#7c59cf]">서양 별자리까지 함께 읽는 통합 리포트</b>도 준비 중이야.
           </p>
@@ -409,7 +409,7 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
                   {f.q}
                   <span className="text-[14px] text-[#b395f5] transition group-open:rotate-45">+</span>
                 </summary>
-                <p className="mt-2 pr-6 text-[11.5px] leading-[1.9] text-[#8a78a6]">{f.a}</p>
+                <p className="mt-2 pr-6 text-[11.5px] leading-[1.9] text-[#6a5788]">{f.a}</p>
               </details>
             ))}
           </div>
@@ -425,7 +425,7 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
             <span className="t-display text-[14px] text-[#6b568c]">{copy.brand.name}</span>
             <span className="text-[10px] text-[#c9b6e4]">✧</span>
           </div>
-          <p className="mt-2 text-[10.5px] leading-[1.9] text-[#a08cbe]">
+          <p className="mt-2 text-[10.5px] leading-[1.9] text-[#75628f]">
             자미두수는 전통 상담 문화야. 이 이야기는 오락과 자기 이해를 위한 콘텐츠이고,
             의료·법률·투자 같은 중요한 결정의 근거로는 쓸 수 없어.
             <br />© 2026 {copy.brand.name}. 프로토타입.

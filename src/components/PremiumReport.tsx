@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ChartModel } from '../lib/chart';
 import { buildTeaser, deepProfileOf, monthlyGuide, palaceReadings, palaceScore, profileOf } from '../lib/content';
 import { MUTAGEN_MEANING, PALACES, STAR_HANJA } from '../lib/terms';
-import { buildChartSummaryText, generateAiReport, isAiConfigured } from '../services/aiReport';
+import { generateAiReport, isAiConfigured } from '../services/aiReport';
 import { useTheme } from '../lib/theme';
 import { findProduct, productPrice } from '../lib/products';
 import GuardianGoods from './GuardianGoods';
@@ -77,17 +77,6 @@ export default function PremiumReport({ chart, tier, focusAi = false, onBack, on
     const result = await generateAiReport({ tier: tier === 'premium' ? 'premium' : 'basic', chart });
     if (result.ok) setAi({ loading: false, text: result.markdown, error: null });
     else setAi({ loading: false, text: null, error: result.reason });
-  };
-
-  const [copied, setCopied] = useState(false);
-  const copySummary = async () => {
-    try {
-      await navigator.clipboard.writeText(buildChartSummaryText(chart));
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2200);
-    } catch {
-      setCopied(false);
-    }
   };
 
   useEffect(() => {
@@ -486,16 +475,9 @@ export default function PremiumReport({ chart, tier, focusAi = false, onBack, on
               <h2 className="t-display mt-3 text-[23px] sm:text-[27px]">진로 · 전공 · 배우자 · 재물</h2>
               <p className="mt-2 max-w-[560px] text-[12px] leading-[1.9] t-muted">
                 “운이 좋다” 대신 실제 학과명과 직함, 배우자의 첫인상, 돈이 새는 장면을 짚었습니다.
-                다른 AI에 붙여넣지 않아도 여기서 바로 읽을 수 있습니다.
+                이 리포트 안에서 바로 읽을 수 있습니다.
               </p>
             </div>
-            <button onClick={copySummary} className="t-btn t-btn-ghost !px-4 !py-2.5 text-[11.5px]">
-              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.6">
-                <rect x="9" y="9" width="11" height="11" rx="2" />
-                <path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
-              </svg>
-              {copied ? '복사됨 ✓' : '명반 요약 텍스트 복사'}
-            </button>
           </div>
 
           <div className="mt-5 grid gap-3.5 sm:grid-cols-2">

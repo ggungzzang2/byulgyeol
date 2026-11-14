@@ -2,11 +2,12 @@ import { useState } from 'react';
 import type { ChartModel, PalaceView } from '../lib/chart';
 import { buildTeaser, deepProfileOf, palaceScore, profileOf } from '../lib/content';
 import { CHARACTER_FIRST_PRICE, PRODUCTS, productBadge, productPoints, productPrice, productScopeShort, productShortCta, productTagline, type ProductId } from '../lib/products';
-import { buildChartSummaryText } from '../services/aiReport';
 import { STAR_HANJA } from '../lib/terms';
 import { THEME_ART, useTheme } from '../lib/theme';
 import { guardianRecommendation } from '../lib/guardianGoods';
 import { downloadDataUrl, renderShareCard } from '../lib/shareCard';
+import { starGlowStyle, starVisual } from '../lib/starPalette';
+import StarEmblem from './StarEmblem';
 import ChartBoard from './ChartBoard';
 import PalaceDetail from './PalaceDetail';
 import { ArrowIcon, LockIcon, SectionLabel, StarMark } from './ui';
@@ -33,7 +34,6 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
   const moneyScore = pick('재백궁');
   const loveScore = pick('부처궁');
   const workScore = pick('관록궁');
-  const healthScore = pick('질액궁');
 
   const flash = (msg: string) => {
     setToast(msg);
@@ -55,32 +55,6 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
       flash(copy.chart.toastSaveFail);
     } finally {
       setSaving(false);
-    }
-  };
-
-  const copySummary = async () => {
-    const text = buildChartSummaryText(chart);
-    try {
-      await navigator.clipboard.writeText(text);
-      flash(
-        isCharacter
-          ? '명반 요약을 복사했어! ChatGPT·제미나이에 붙여넣어 봐 ✨'
-          : '명반 요약을 복사했습니다. ChatGPT·제미나이에 붙여넣으세요.',
-      );
-    } catch {
-      try {
-        const area = document.createElement('textarea');
-        area.value = text;
-        area.style.position = 'fixed';
-        area.style.opacity = '0';
-        document.body.appendChild(area);
-        area.select();
-        document.execCommand('copy');
-        area.remove();
-        flash('명반 요약을 복사했습니다.');
-      } catch {
-        flash('복사에 실패했습니다. 다시 시도해 주세요.');
-      }
     }
   };
 
@@ -147,7 +121,14 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
             <div className="t-panel p-6 sm:p-8">
               {isCharacter ? (
                 <>
-                  <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(255,200,160,0.4), transparent 70%)' }} />
+                  <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full" style={starGlowStyle(chart.primaryStar)} />
+                  <div className="pointer-events-none absolute -left-20 bottom-0 h-72 w-72 rounded-full opacity-40" style={starGlowStyle(chart.primaryStar)} />
+                  <StarEmblem
+                    star={chart.primaryStar}
+                    className="pointer-events-none absolute -right-4 top-20 h-40 w-40 sm:h-48 sm:w-48"
+                    color="var(--panel-accent)"
+                    opacity={0.13}
+                  />
                   <div className="t-starfield opacity-40" />
                 </>
               ) : (
@@ -159,7 +140,8 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
               )}
 
               <div className="relative">
-                <div className="flex items-start justify-between gap-3">
+                <p className="text-[11.5px] tracking-[0.2em] t-panel-accent">동양 전통 자미두수 · 12궁 명반</p>
+                <div className="mt-3 flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <StarMark className="h-3 w-3" />
                     <span className="text-[10px] tracking-[0.24em] t-panel-accent">{copy.chart.soulLabel}</span>
@@ -182,10 +164,17 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
 
                 <h2 className="t-panel-title mt-4 text-[44px] leading-none sm:text-[56px]">
                   {chart.primaryStar}
-                  <span className="ml-1 text-[20px] font-light opacity-60 sm:text-[24px]">
+                  <span className="ml-1 text-[24px] font-light opacity-70 sm:text-[28px]">
                     {isCharacter ? '별' : '성'}
                   </span>
                 </h2>
+
+                {isCharacter && (
+                  <p className="mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px]" style={{ border: '1px solid var(--panel-rule)', color: 'var(--panel-accent)' }}>
+                    <StarEmblem star={chart.primaryStar} className="h-3.5 w-3.5" color="currentColor" opacity={0.9} />
+                    {starVisual(chart.primaryStar).mood}
+                  </p>
+                )}
 
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] t-panel-body">
                   {chart.primaryBrightness && <span>밝기 {chart.primaryBrightness}</span>}
@@ -228,6 +217,26 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
                   ))}
                 </div>
 
+                {isCharacter && (
+                  <div className="mt-6 grid grid-cols-3 gap-2 rounded-2xl px-3 py-4" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid var(--panel-rule)' }}>
+                    {[
+                      { label: '연애의 별', value: loveScore },
+                      { label: '금전의 별', value: moneyScore },
+                      { label: '일의 별', value: workScore },
+                    ].map((s) => (
+                      <div key={s.label} className="text-center">
+                        <p className="num text-[26px] font-bold leading-none" style={{ color: 'var(--panel-accent)' }}>
+                          {s.value}
+                        </p>
+                        <p className="mt-1.5 text-[11.5px] t-panel-body">{s.label}</p>
+                        <div className="mx-auto mt-2 h-[4px] w-[70%] overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.18)' }}>
+                          <div className="h-full rounded-full" style={{ width: `${s.value}%`, background: 'var(--panel-accent)' }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <div className="mt-6 grid gap-4 pt-5 sm:grid-cols-2" style={{ borderTop: '1px solid var(--panel-rule)' }}>
                   <div>
                     <p className="text-[9.5px] tracking-[0.18em] t-panel-accent">{copy.chart.strength}</p>
@@ -251,13 +260,6 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
                     </svg>
                     {saving ? copy.chart.saveBusy : copy.chart.save}
                   </button>
-                  <button onClick={copySummary} className="t-btn t-btn-onpanel !px-4 !py-2.5 text-[11.5px]">
-                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.6">
-                      <rect x="9" y="9" width="11" height="11" rx="2" />
-                      <path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
-                    </svg>
-                    {isCharacter ? '요약 복사' : '명반 요약 복사'}
-                  </button>
                   <button onClick={share} className="t-btn t-btn-onpanel !px-4 !py-2.5 text-[11.5px]">
                     <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7">
                       <circle cx="17.5" cy="6" r="2.5" />
@@ -271,29 +273,12 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
               </div>
             </div>
 
-            {/* 오른쪽: 지수 + 올해 */}
+            {/* 오른쪽: 지수(미스틱) + 올해 */}
             <div className="flex flex-col gap-4">
-              <div className="t-card p-5 sm:p-6">
-                <p className="text-[10px] tracking-[0.18em] t-faint">{copy.chart.numbersTitle}</p>
+              {!isCharacter && (
+                <div className="t-card p-5 sm:p-6">
+                  <p className="text-[10px] tracking-[0.18em] t-faint">{copy.chart.numbersTitle}</p>
 
-                {isCharacter ? (
-                  <div className="mt-3.5 grid grid-cols-4 gap-1.5">
-                    {[
-                      { name: '연애의 별', value: loveScore, glyph: '★', color: '#ff9db8', bg: 'linear-gradient(180deg,#fff2f6,#ffe4ec)' },
-                      { name: '금전의 별', value: moneyScore, glyph: '★', color: '#f0c16a', bg: 'linear-gradient(180deg,#fffaee,#fff1d8)' },
-                      { name: '일의 별', value: workScore, glyph: '★', color: '#8fb6ff', bg: 'linear-gradient(180deg,#f1f6ff,#e4eeff)' },
-                      { name: '건강의 별', value: healthScore, glyph: '★', color: '#7fd4b8', bg: 'linear-gradient(180deg,#f0fcf8,#e2f7ef)' },
-                    ].map((b) => (
-                      <div key={b.name} className="star-badge !px-1 !py-2.5" style={{ background: b.bg }}>
-                        <span className="star-badge__glyph !text-[17px]" style={{ color: b.color }} aria-hidden="true">
-                          {b.glyph}
-                        </span>
-                        <span className="star-badge__name !text-[8.5px]">{b.name}</span>
-                        <span className="num text-[11px] font-bold text-[#6b4fa0]">{b.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
                   <div className="mt-4 space-y-3.5">
                     {[
                       { label: '재물', score: moneyScore },
@@ -318,12 +303,12 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
                       </div>
                     ))}
                   </div>
-                )}
 
-                <p className="mt-4 text-[10.5px] leading-relaxed t-faint">{copy.chart.numbersNote}</p>
-              </div>
+                  <p className="mt-4 text-[10.5px] leading-relaxed t-faint">{copy.chart.numbersNote}</p>
+                </div>
+              )}
 
-              <div className="t-card flex flex-1 flex-col justify-between p-5 sm:p-6">
+              <div className={`t-card flex flex-col justify-between p-5 sm:p-6 ${isCharacter ? '' : 'flex-1'}`}>
                 <div>
                   <p className="text-[10px] tracking-[0.18em]" style={{ color: 'var(--accent-deep)' }}>
                     {chart.yearly.year}년 · {isCharacter ? '올해의 별' : '유년'} {chart.yearly.stemBranch}
@@ -412,13 +397,13 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
                 <h2 className="t-panel-title mt-3 text-[21px] leading-[1.45] sm:text-[25px]">
                   {isCharacter ? (
                     <>
-                      다른 AI에 붙여넣지 말고,
+                      진로·배우자상·돈 새는 장면까지,
                       <br />
                       여기서 한 번에 ✨
                     </>
                   ) : (
                     <>
-                      명반을 복사해 다른 AI에 넣지 말고,
+                      진로·배우자상·돈 새는 장면까지
                       <br />
                       여기서 바로 읽으세요
                     </>
@@ -434,16 +419,6 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
                   자미두수 12궁 × 서양 네이탈 차트 통합 해석도 확장 준비 중입니다.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <button
-                    onClick={copySummary}
-                    className="t-btn t-btn-onpanel !px-4 !py-2.5 text-[11.5px]"
-                  >
-                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.6">
-                      <rect x="9" y="9" width="11" height="11" rx="2" />
-                      <path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
-                    </svg>
-                    내 명반 요약 텍스트 복사
-                  </button>
                   <button
                     onClick={onAiReport}
                     className="t-btn t-btn-gold !px-4 !py-2.5 text-[11.5px]"

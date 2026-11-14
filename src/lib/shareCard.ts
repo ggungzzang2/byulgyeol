@@ -2,12 +2,14 @@
  * 공유 카드 이미지 생성 (shareCard.ts)
  * ------------------------------------------------------------------
  * 서버 없이 브라우저 canvas 로 1080×1350(인스타그램 4:5) PNG 를 그립니다.
- * 테마마다 완전히 다른 카드가 나옵니다:
+ *
  *   mystic    — 딥 벨벳 + 금박 프레임 + 성좌 궤도
- *   character — 라벤더/피치 파스텔 + 구름 + 별 배지
+ *   character — 주성별 고유 팔레트의 '타로/부적 카드'
+ *               (성좌 배경 + 금박·라벤더 프레임 + 중앙 가디언 + 주성 문양)
  */
 import type { ChartModel } from '../lib/chart';
 import { palaceScore, profileOf } from '../lib/content';
+import { drawStarEmblem, starVisual } from '../lib/starPalette';
 import { STAR_HANJA } from '../lib/terms';
 import type { ThemeId } from '../lib/theme';
 
@@ -22,16 +24,27 @@ async function ensureFonts() {
   const specs = [
     `500 34px ${SERIF}`,
     `700 126px ${SERIF}`,
+    `700 108px ${SERIF}`,
+    `700 100px ${SERIF}`,
+    `700 104px ${SERIF}`,
     `500 46px ${SERIF}`,
+    `500 44px ${SERIF}`,
     `500 40px ${SERIF}`,
+    `500 30px ${SERIF}`,
+    `500 26px ${SERIF}`,
     `500 24px ${SERIF}`,
     `400 20px ${SANS}`,
     `500 22px ${SANS}`,
     `500 26px ${SANS}`,
+    `500 28px ${SANS}`,
+    `500 30px ${SANS}`,
     `400 27px ${SANS}`,
+    `400 30px ${SANS}`,
     `400 34px ${ROUND}`,
     `400 64px ${ROUND}`,
     `400 30px ${ROUND}`,
+    `400 28px ${ROUND}`,
+    `400 27px ${ROUND}`,
     `400 22px ${ROUND}`,
   ];
   const sample = '별결 자미원 별의 속삭임 태양성 강점 주의 재물 연애 직업 명궁 사용설명서 1996 5 21';
@@ -60,6 +73,32 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
   return lines;
 }
 
+/**
+ * 좁은 칸에 문장을 넣을 때: 크기를 한 단계씩 줄여가며 maxLines 안에 담는다.
+ * 그래도 넘치면 마지막 줄을 말줄임(…)으로 다듬어 문장이 중간에서 끊겨 보이지 않게 한다.
+ */
+function fitText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  maxLines: number,
+  sizes: number[],
+  family: string,
+): { size: number; lines: string[] } {
+  let lines: string[] = [];
+  let size = sizes[sizes.length - 1];
+  for (const s of sizes) {
+    ctx.font = `400 ${s}px ${family}`;
+    lines = wrapText(ctx, text, maxWidth);
+    size = s;
+    if (lines.length <= maxLines) return { size, lines };
+  }
+  const kept = lines.slice(0, maxLines);
+  const last = kept[maxLines - 1];
+  kept[maxLines - 1] = `${last.replace(/[\s,·]+$/, '')}…`;
+  return { size, lines: kept };
+}
+
 function trackedWidth(ctx: CanvasRenderingContext2D, text: string, tracking: number) {
   let w = 0;
   for (const ch of text) w += ctx.measureText(ch).width + tracking;
@@ -72,13 +111,23 @@ function drawTracked(
   x: number,
   y: number,
   tracking: number,
-  align: 'left' | 'right' = 'left',
+  align: 'left' | 'right' | 'center' = 'left',
 ) {
-  let cursor = align === 'right' ? x - trackedWidth(ctx, text, tracking) : x;
+  const total = trackedWidth(ctx, text, tracking);
+  let cursor = align === 'right' ? x - total : align === 'center' ? x - total / 2 : x;
   for (const ch of text) {
     ctx.fillText(ch, cursor, y);
     cursor += ctx.measureText(ch).width + tracking;
   }
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement | null> {
@@ -100,6 +149,17 @@ function drawStarPath(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: 
     if (i === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   }
+  ctx.closePath();
+}
+
+/** 둥근 상단(아치) 창 모양 path */
+function archPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+  const r = w / 2;
+  ctx.beginPath();
+  ctx.moveTo(x, y + h);
+  ctx.lineTo(x, y + r);
+  ctx.arc(x + r, y + r, r, Math.PI, 0);
+  ctx.lineTo(x + w, y + h);
   ctx.closePath();
 }
 
@@ -200,9 +260,9 @@ async function renderMystic(chart: ChartModel): Promise<string> {
   ctx.font = `500 38px ${SERIF}`;
   drawTracked(ctx, '자미원', 104, 158, 10);
 
-  ctx.fillStyle = 'rgba(246,238,224,0.42)';
-  ctx.font = `400 19px ${SANS}`;
-  drawTracked(ctx, '紫微垣 · ZI WEI YUAN', W - 104, 154, 4, 'right');
+  ctx.fillStyle = 'rgba(246,238,224,0.62)';
+  ctx.font = `400 22px ${SANS}`;
+  drawTracked(ctx, '동양 전통 자미두수 · 12궁 명반', W - 104, 156, 1.5, 'right');
 
   ctx.strokeStyle = 'rgba(227,192,123,0.3)';
   ctx.beginPath();
@@ -211,8 +271,8 @@ async function renderMystic(chart: ChartModel): Promise<string> {
   ctx.stroke();
 
   // 명궁 라벨
-  ctx.fillStyle = 'rgba(227,192,123,0.9)';
-  ctx.font = `500 21px ${SANS}`;
+  ctx.fillStyle = 'rgba(227,192,123,0.92)';
+  ctx.font = `500 24px ${SANS}`;
   drawTracked(ctx, '命宮 · 명궁의 주성', 104, 258, 5);
 
   // 주성
@@ -220,8 +280,8 @@ async function renderMystic(chart: ChartModel): Promise<string> {
   ctx.font = `700 132px ${SERIF}`;
   ctx.fillText(`${chart.primaryStar}성`, 100, 402);
 
-  ctx.fillStyle = 'rgba(227,192,123,0.75)';
-  ctx.font = `500 36px ${SERIF}`;
+  ctx.fillStyle = 'rgba(227,192,123,0.8)';
+  ctx.font = `500 38px ${SERIF}`;
   ctx.textAlign = 'right';
   ctx.fillText(STAR_HANJA[chart.primaryStar] ?? '', W - 108, 396);
   ctx.textAlign = 'left';
@@ -234,104 +294,104 @@ async function renderMystic(chart: ChartModel): Promise<string> {
 
   // 정체성
   ctx.fillStyle = '#f4ead9';
-  ctx.font = `500 42px ${SERIF}`;
+  ctx.font = `500 44px ${SERIF}`;
   const idLines = wrapText(ctx, `“${profile.identity}”`, W - 220).slice(0, 2);
-  idLines.forEach((l, i) => ctx.fillText(l, 104, 490 + i * 58));
+  idLines.forEach((l, i) => ctx.fillText(l, 104, 494 + i * 60));
 
   // 키워드 칩
-  let chipY = 490 + idLines.length * 58 + 16;
+  let chipY = 494 + idLines.length * 60 + 14;
   let chipX = 104;
-  ctx.font = `500 25px ${SANS}`;
+  ctx.font = `500 26px ${SANS}`;
   profile.keywords.forEach((k) => {
     const label = `#${k}`;
-    const w = ctx.measureText(label).width + 48;
+    const w = ctx.measureText(label).width + 50;
     if (chipX + w > W - 104) {
       chipX = 104;
-      chipY += 62;
+      chipY += 64;
     }
     ctx.fillStyle = 'rgba(227,192,123,0.1)';
-    ctx.strokeStyle = 'rgba(227,192,123,0.32)';
+    ctx.strokeStyle = 'rgba(227,192,123,0.38)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.roundRect(chipX, chipY, w, 52, 26);
+    ctx.roundRect(chipX, chipY, w, 54, 27);
     ctx.fill();
     ctx.stroke();
     ctx.fillStyle = 'rgba(227,192,123,0.95)';
-    ctx.fillText(label, chipX + 24, chipY + 35);
+    ctx.fillText(label, chipX + 25, chipY + 37);
     chipX += w + 12;
   });
 
   // 구분선
-  const rule = chipY + 100;
-  ctx.strokeStyle = 'rgba(227,192,123,0.22)';
+  const rule = chipY + 104;
+  ctx.strokeStyle = 'rgba(227,192,123,0.24)';
   ctx.beginPath();
   ctx.moveTo(104, rule);
   ctx.lineTo(W - 104, rule);
   ctx.stroke();
 
   // 강점 / 주의
-  let cy = rule + 54;
-  ctx.fillStyle = 'rgba(227,192,123,0.85)';
-  ctx.font = `500 19px ${SANS}`;
+  let cy = rule + 58;
+  ctx.fillStyle = 'rgba(227,192,123,0.88)';
+  ctx.font = `500 22px ${SANS}`;
   drawTracked(ctx, '강점', 104, cy, 5);
-  ctx.fillStyle = 'rgba(248,241,228,0.9)';
-  ctx.font = `400 26px ${SANS}`;
+  ctx.fillStyle = 'rgba(248,241,228,0.92)';
+  ctx.font = `400 30px ${SANS}`;
   const strengthLines = wrapText(ctx, profile.strength, W - 208).slice(0, 3);
-  strengthLines.forEach((l, i) => ctx.fillText(l, 104, cy + 42 + i * 40));
-  cy += 42 + strengthLines.length * 40 + 32;
+  strengthLines.forEach((l, i) => ctx.fillText(l, 104, cy + 44 + i * 42));
+  cy += 44 + strengthLines.length * 42 + 34;
 
-  ctx.fillStyle = 'rgba(227,192,123,0.85)';
-  ctx.font = `500 19px ${SANS}`;
+  ctx.fillStyle = 'rgba(227,192,123,0.88)';
+  ctx.font = `500 22px ${SANS}`;
   drawTracked(ctx, '주의', 104, cy, 5);
-  ctx.fillStyle = 'rgba(246,238,224,0.62)';
-  ctx.font = `400 26px ${SANS}`;
+  ctx.fillStyle = 'rgba(246,238,224,0.74)';
+  ctx.font = `400 30px ${SANS}`;
   const cautionLines = wrapText(ctx, profile.caution, W - 208).slice(0, 2);
-  cautionLines.forEach((l, i) => ctx.fillText(l, 104, cy + 42 + i * 40));
+  cautionLines.forEach((l, i) => ctx.fillText(l, 104, cy + 44 + i * 42));
 
   // 지수
-  const statsY = 1128;
-  ctx.strokeStyle = 'rgba(227,192,123,0.22)';
+  const statsY = 1110;
+  ctx.strokeStyle = 'rgba(227,192,123,0.24)';
   ctx.beginPath();
-  ctx.moveTo(104, statsY - 74);
-  ctx.lineTo(W - 104, statsY - 74);
+  ctx.moveTo(104, statsY - 84);
+  ctx.lineTo(W - 104, statsY - 84);
   ctx.stroke();
 
   scores.forEach(([label, value], i) => {
     const x = 104 + i * 292;
     ctx.fillStyle = goldGrad;
-    ctx.font = `500 48px ${SERIF}`;
+    ctx.font = `500 50px ${SERIF}`;
     ctx.fillText(String(value), x, statsY);
-    ctx.fillStyle = 'rgba(246,238,224,0.5)';
-    ctx.font = `400 19px ${SANS}`;
-    drawTracked(ctx, label, x, statsY + 34, 4);
-    ctx.fillStyle = 'rgba(246,238,224,0.12)';
+    ctx.fillStyle = 'rgba(246,238,224,0.68)';
+    ctx.font = `400 22px ${SANS}`;
+    drawTracked(ctx, label, x, statsY + 36, 4);
+    ctx.fillStyle = 'rgba(246,238,224,0.14)';
     ctx.beginPath();
-    ctx.roundRect(x, statsY + 52, 232, 4, 2);
+    ctx.roundRect(x, statsY + 56, 232, 5, 2.5);
     ctx.fill();
-    ctx.fillStyle = 'rgba(227,192,123,0.9)';
+    ctx.fillStyle = 'rgba(227,192,123,0.95)';
     ctx.beginPath();
-    ctx.roundRect(x, statsY + 52, (232 * value) / 100, 4, 2);
+    ctx.roundRect(x, statsY + 56, (232 * value) / 100, 5, 2.5);
     ctx.fill();
   });
 
   // 푸터
-  ctx.strokeStyle = 'rgba(227,192,123,0.22)';
+  ctx.strokeStyle = 'rgba(227,192,123,0.24)';
   ctx.beginPath();
-  ctx.moveTo(104, H - 148);
-  ctx.lineTo(W - 104, H - 148);
+  ctx.moveTo(104, H - 152);
+  ctx.lineTo(W - 104, H - 152);
   ctx.stroke();
 
-  ctx.fillStyle = 'rgba(246,238,224,0.5)';
-  ctx.font = `400 21px ${SANS}`;
+  ctx.fillStyle = 'rgba(246,238,224,0.68)';
+  ctx.font = `400 24px ${SANS}`;
   ctx.fillText(
     `${chart.solarText}  ·  ${chart.timeText.replace(' (정오 기준)', '')}  ·  ${chart.fiveElements}`,
     104,
-    H - 102,
+    H - 100,
   );
 
-  ctx.fillStyle = 'rgba(227,192,123,0.9)';
-  ctx.font = `500 21px ${SERIF}`;
-  drawTracked(ctx, '자미원 紫微垣', W - 104, H - 104, 4, 'right');
+  ctx.fillStyle = 'rgba(227,192,123,0.92)';
+  ctx.font = `500 24px ${SERIF}`;
+  drawTracked(ctx, '자미원 紫微垣', W - 104, H - 102, 4, 'right');
 
   return canvas.toDataURL('image/png');
 }
@@ -339,10 +399,11 @@ async function renderMystic(chart: ChartModel): Promise<string> {
 /* --------------------------------------------------------------- character */
 async function renderCharacter(chart: ChartModel): Promise<string> {
   const profile = profileOf(chart.primaryStar);
-  const scores: Array<[string, string, number, string]> = [
-    ['연애의 별', '★', palaceScore(chart.palaces.find((p) => p.name === '부처궁')), '#ff9db8'],
-    ['금전의 별', '★', palaceScore(chart.palaces.find((p) => p.name === '재백궁')), '#f0c16a'],
-    ['일의 별', '★', palaceScore(chart.palaces.find((p) => p.name === '관록궁')), '#8fb6ff'],
+  const v = starVisual(chart.primaryStar);
+  const scores: Array<[string, number]> = [
+    ['연애의 별', palaceScore(chart.palaces.find((p) => p.name === '부처궁'))],
+    ['금전의 별', palaceScore(chart.palaces.find((p) => p.name === '재백궁'))],
+    ['일의 별', palaceScore(chart.palaces.find((p) => p.name === '관록궁'))],
   ];
 
   const canvas = document.createElement('canvas');
@@ -351,193 +412,269 @@ async function renderCharacter(chart: ChartModel): Promise<string> {
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('canvas unavailable');
 
-  // 파스텔 하늘
-  const bg = ctx.createLinearGradient(0, 0, W * 0.4, H);
-  bg.addColorStop(0, '#efe3ff');
-  bg.addColorStop(0.42, '#f8efff');
-  bg.addColorStop(0.75, '#ffeadf');
-  bg.addColorStop(1, '#ffe2d3');
+  /* 1. 주성 고유 배경 */
+  const bg = ctx.createLinearGradient(0, 0, W * 0.7, H);
+  bg.addColorStop(0, v.bg[0]);
+  bg.addColorStop(0.52, v.bg[1]);
+  bg.addColorStop(1, v.bg[2]);
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  // 구름
-  const cloud = (cx: number, cy: number, r: number, alpha: number) => {
-    const g = ctx.createRadialGradient(cx, cy, r * 0.1, cx, cy, r);
-    g.addColorStop(0, `rgba(255,255,255,${alpha})`);
-    g.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fill();
-  };
-  cloud(80, 180, 220, 0.85);
-  cloud(W - 40, 240, 260, 0.7);
-  cloud(140, H - 140, 260, 0.8);
-  cloud(W - 120, H - 90, 240, 0.6);
+  // 위에서 아래로 번지는 빛 — 원형 경계가 보이지 않게 세로 그라데이션으로 얹는다
+  const auraTop = ctx.createLinearGradient(0, 40, 0, 820);
+  auraTop.addColorStop(0, v.aura.replace(/[\d.]+\)$/, '0.5)'));
+  auraTop.addColorStop(0.5, v.aura.replace(/[\d.]+\)$/, '0.12)'));
+  auraTop.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = auraTop;
+  ctx.fillRect(0, 0, W, H);
 
-  // 반짝이
-  for (let i = 0; i < 26; i++) {
-    const x = 70 + ((i * 271) % (W - 140));
-    const y = 70 + ((i * 397) % (H - 200));
-    const s = i % 4 === 0 ? 11 : 6;
-    ctx.fillStyle = i % 3 === 0 ? 'rgba(255,240,190,0.95)' : 'rgba(255,255,255,0.9)';
-    drawStarPath(ctx, x, y, s, 4);
+  const auraBottom = ctx.createRadialGradient(W * 0.2, H * 0.94, 30, W * 0.2, H * 0.94, 620);
+  auraBottom.addColorStop(0, v.aura2);
+  auraBottom.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = auraBottom;
+  ctx.fillRect(0, 0, W, H);
+
+  /* 2. 성좌 배경 */
+  for (let i = 0; i < 210; i++) {
+    const x = (i * 173.3 + (i % 9) * 11) % W;
+    const y = (i * 241.7 + (i % 5) * 17) % H;
+    const r = i % 13 === 0 ? 2.4 : i % 5 === 0 ? 1.5 : 0.9;
+    ctx.fillStyle = i % 4 === 0 ? hexToRgba(v.accent, 0.28 + ((i * 7) % 40) / 100) : `rgba(255,255,255,${0.14 + ((i * 11) % 42) / 100})`;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // 메인 카드
-  ctx.save();
-  ctx.shadowColor = 'rgba(120, 86, 170, 0.28)';
-  ctx.shadowBlur = 60;
-  ctx.shadowOffsetY = 24;
-  ctx.fillStyle = 'rgba(255,255,255,0.93)';
+  // 성좌 연결선 — 위·아래 띠에 흩어진 별을 잇는다
+  const constellation: Array<[number, number]> = [];
+  for (let i = 0; i < 9; i++) {
+    const a = (i * 2.3 + chart.primaryStar.length) % (Math.PI * 2);
+    constellation.push([W / 2 + Math.cos(a) * (300 + (i % 3) * 90), 300 + Math.sin(a) * (240 + (i % 4) * 60)]);
+  }
+  ctx.strokeStyle = hexToRgba(v.accent, 0.22);
+  ctx.lineWidth = 1.3;
   ctx.beginPath();
-  ctx.roundRect(72, 84, W - 144, H - 214, 56);
-  ctx.fill();
-  ctx.restore();
-  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.roundRect(72, 84, W - 144, H - 214, 56);
+  constellation.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)));
   ctx.stroke();
 
-  // 헤더
-  ctx.fillStyle = '#7c59cf';
-  ctx.font = `400 30px ${ROUND}`;
-  drawTracked(ctx, '별의 속삭임', 132, 168, 2);
-  ctx.fillStyle = 'rgba(146,116,192,0.6)';
-  ctx.font = `400 18px ${ROUND}`;
-  drawTracked(ctx, 'WHISPER OF STARS', W - 132, 166, 3, 'right');
+  /* 3. 주성 문양 워터마크 */
+  drawStarEmblem(ctx, chart.primaryStar, {
+    cx: W / 2,
+    cy: 400,
+    size: 660,
+    color: v.accent,
+    fillAlpha: 0.07,
+    strokeAlpha: 0.22,
+    lineWidth: 1.6,
+  });
 
-  // 수호별 라벨
-  ctx.fillStyle = '#a58ec6';
-  ctx.font = `400 22px ${ROUND}`;
-  ctx.fillText('너의 수호별', 132, 252);
+  /* 4. 금박·라벤더 프레임 */
+  const frameGrad = ctx.createLinearGradient(0, 0, W, H);
+  frameGrad.addColorStop(0, v.frame);
+  frameGrad.addColorStop(0.5, hexToRgba(v.accent, 0.45));
+  frameGrad.addColorStop(1, v.frame);
 
-  // 주성
-  ctx.fillStyle = '#4d3a6d';
-  ctx.font = `400 112px ${ROUND}`;
-  ctx.fillText(`${chart.primaryStar}별`, 128, 372);
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.35)';
+  ctx.shadowBlur = 24;
+  ctx.strokeStyle = frameGrad;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(38, 38, W - 76, H - 76, 34);
+  ctx.stroke();
+  ctx.restore();
 
-  ctx.fillStyle = '#c9b6e4';
-  ctx.font = `400 25px ${ROUND}`;
-  ctx.fillText(`${STAR_HANJA[chart.primaryStar] ?? ''} · 命宮`, 136, 404);
+  ctx.strokeStyle = hexToRgba(v.accent, 0.38);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(56, 56, W - 112, H - 112, 24);
+  ctx.stroke();
 
-  // 가디언 (오른쪽 위 원형)
+  // 모서리 장식 (금박 ㄱ자 + 다이아)
+  ctx.strokeStyle = frameGrad;
+  ctx.lineWidth = 2.4;
+  const corner = (x: number, y: number, sx: number, sy: number) => {
+    ctx.beginPath();
+    ctx.moveTo(x + sx * 58, y);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x, y + sy * 58);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + sx * 16, y + sy * 10);
+    ctx.lineTo(x + sx * 10, y + sy * 16);
+    ctx.stroke();
+  };
+  corner(38, 38, 1, 1);
+  corner(W - 38, 38, -1, 1);
+  corner(38, H - 38, 1, -1);
+  corner(W - 38, H - 38, -1, -1);
+
+  /* 5. 헤더 */
+  ctx.fillStyle = hexToRgba(v.light, 0.92);
+  ctx.font = `400 36px ${ROUND}`;
+  drawTracked(ctx, '별의 속삭임', 108, 118, 2);
+  ctx.fillStyle = hexToRgba(v.light, 0.95);
+  ctx.font = `500 24px ${SANS}`;
+  drawTracked(ctx, '동양 전통 자미두수 · 12궁 명반', W - 108, 117, 1.5, 'right');
+
+  /* 6. 수호별 라벨 + 아치 창 */
+  const archX = 300;
+  const archW = 480;
+  const archY = 148;
+  const archH = 402;
+
+  const halo = ctx.createRadialGradient(W / 2, archY + archH * 0.5, 40, W / 2, archY + archH * 0.5, 320);
+  halo.addColorStop(0, v.aura);
+  halo.addColorStop(0.45, v.aura.replace(/[\d.]+\)$/, '0.16)'));
+  halo.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = halo;
+  ctx.fillRect(W / 2 - 340, archY - 300, 680, archH + 420);
+
   const img = await loadImage(`${import.meta.env.BASE_URL}art/guardian-bunny.webp`);
   if (img) {
     ctx.save();
-    ctx.beginPath();
-    ctx.arc(W - 236, 300, 86, 0, Math.PI * 2);
-    ctx.closePath();
+    archPath(ctx, archX, archY, archW, archH);
     ctx.clip();
-    ctx.drawImage(img, W - 322, 214, 172, 172);
+    const scale = Math.max(archW / img.width, archH / img.height);
+    const dw = img.width * scale;
+    const dh = img.height * scale;
+    ctx.drawImage(img, archX + (archW - dw) / 2, archY + (archH - dh) * 0.28, dw, dh);
+    // 창 안쪽 비네트
+    const vig = ctx.createLinearGradient(0, archY + archH * 0.6, 0, archY + archH);
+    vig.addColorStop(0, 'rgba(0,0,0,0)');
+    vig.addColorStop(1, hexToRgba(v.bg[2], 0.55));
+    ctx.fillStyle = vig;
+    ctx.fillRect(archX, archY, archW, archH);
     ctx.restore();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.arc(W - 236, 300, 86, 0, Math.PI * 2);
+
+    ctx.strokeStyle = hexToRgba(v.light, 0.9);
+    ctx.lineWidth = 4;
+    archPath(ctx, archX, archY, archW, archH);
+    ctx.stroke();
+
+    ctx.strokeStyle = hexToRgba(v.accent, 0.8);
+    ctx.lineWidth = 1.4;
+    archPath(ctx, archX - 12, archY - 12, archW + 24, archH + 24);
     ctx.stroke();
   }
 
-  // 말풍선
-  const bubbleX = 132;
-  const bubbleY = 436;
-  const bubbleW = W - 264;
-  ctx.fillStyle = '#f7f1ff';
-  ctx.beginPath();
-  ctx.roundRect(bubbleX, bubbleY, bubbleW, 170, 34);
-  ctx.fill();
-  ctx.fillStyle = '#6b538f';
-  ctx.font = `400 32px ${ROUND}`;
-  const bubbleLines = wrapText(ctx, profile.identity, bubbleW - 76).slice(0, 2);
-  const bubbleTextY = bubbleY + 85 - (bubbleLines.length - 1) * 23 + 11;
-  bubbleLines.forEach((l, i) => ctx.fillText(l, bubbleX + 38, bubbleTextY + i * 46));
-  // 꼬리
-  ctx.fillStyle = '#f7f1ff';
-  ctx.beginPath();
-  ctx.moveTo(bubbleX + 54, bubbleY + 168);
-  ctx.lineTo(bubbleX + 84, bubbleY + 202);
-  ctx.lineTo(bubbleX + 100, bubbleY + 168);
-  ctx.closePath();
-  ctx.fill();
-
-  // 키워드
-  let chipX = 132;
-  const chipY = 648;
-  ctx.font = `400 24px ${ROUND}`;
-  profile.keywords.slice(0, 4).forEach((k) => {
-    const label = `✧ ${k}`;
-    const w = ctx.measureText(label).width + 44;
-    if (chipX + w > W - 132) return;
-    ctx.fillStyle = '#efe6ff';
-    ctx.beginPath();
-    ctx.roundRect(chipX, chipY, w, 50, 25);
-    ctx.fill();
-    ctx.fillStyle = '#7c59cf';
-    ctx.fillText(label, chipX + 22, chipY + 34);
-    chipX += w + 12;
+  // 아치 위 작은 문양
+  drawStarEmblem(ctx, chart.primaryStar, {
+    cx: W / 2,
+    cy: archY - 4,
+    size: 66,
+    color: v.accent,
+    fillAlpha: 0.9,
+    strokeAlpha: 0.9,
+    lineWidth: 2.4,
   });
 
-  // 별 배지 3개
-  const badgeY = 744;
-  const badgeW = (W - 264 - 24) / 3;
-  scores.forEach(([label, glyph, value, color], i) => {
-    const x = 132 + i * (badgeW + 12);
-    const g = ctx.createLinearGradient(0, badgeY, 0, badgeY + 190);
-    g.addColorStop(0, '#ffffff');
-    g.addColorStop(1, '#fbf4ff');
-    ctx.fillStyle = g;
+  /* 7. 주성 이름 */
+  ctx.textAlign = 'center';
+  ctx.fillStyle = v.light;
+  ctx.font = `700 100px ${SERIF}`;
+  const nameText = `${chart.primaryStar}별`;
+  ctx.fillText(nameText, W / 2, 674);
+
+  ctx.fillStyle = hexToRgba(v.accent, 0.95);
+  ctx.font = `500 30px ${SANS}`;
+  drawTracked(ctx, `${STAR_HANJA[chart.primaryStar] ?? ''}  ·  ${v.mood}`, W / 2, 716, 3, 'center');
+
+  /* 8. 한 줄 정체성 */
+  ctx.fillStyle = hexToRgba(v.light, 0.94);
+  ctx.font = `500 40px ${SERIF}`;
+  const idLines = wrapText(ctx, `“${profile.identity}”`, W - 240).slice(0, 2);
+  idLines.forEach((l, i) => ctx.fillText(l, W / 2, 760 + i * 46));
+
+  /* 9. 키워드 칩 */
+  ctx.font = `400 28px ${ROUND}`;
+  const chipLabels = profile.keywords.slice(0, 3).map((k) => `✧ ${k}`);
+  const chipSizes = chipLabels.map((l) => ctx.measureText(l).width + 52);
+  const chipGap = 14;
+  const totalChip = chipSizes.reduce((a, b) => a + b, 0) + chipGap * (chipLabels.length - 1);
+  let chipX = (W - totalChip) / 2;
+  const chipY = 798 + (idLines.length - 1) * 46;
+  chipLabels.forEach((label, i) => {
+    ctx.fillStyle = hexToRgba(v.light, 0.14);
+    ctx.strokeStyle = hexToRgba(v.accent, 0.5);
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.roundRect(x, badgeY, badgeW, 190, 26);
+    ctx.roundRect(chipX, chipY, chipSizes[i], 52, 26);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(146,116,192,0.16)';
-    ctx.lineWidth = 1.4;
     ctx.stroke();
-
-    ctx.fillStyle = color;
-    ctx.textAlign = 'center';
-    ctx.font = `400 52px ${ROUND}`;
-    ctx.fillText(glyph, x + badgeW / 2, badgeY + 76);
-    ctx.fillStyle = '#5b4382';
-    ctx.font = `400 22px ${ROUND}`;
-    ctx.fillText(label, x + badgeW / 2, badgeY + 118);
-    ctx.fillStyle = '#8f6fe0';
-    ctx.font = `400 34px ${ROUND}`;
-    ctx.fillText(String(value), x + badgeW / 2, badgeY + 164);
-    ctx.textAlign = 'left';
+    ctx.fillStyle = hexToRgba(v.light, 0.95);
+    ctx.fillText(label, chipX + 26, chipY + 36);
+    chipX += chipSizes[i] + chipGap;
   });
 
-  // 강점 / 주의
-  let cy = 982;
-  const block = (label: string, text: string, tone: string, maxLines: number) => {
-    ctx.fillStyle = tone;
-    ctx.font = `400 21px ${ROUND}`;
-    ctx.fillText(label, 132, cy);
-    ctx.fillStyle = '#6b538f';
-    ctx.font = `400 24px ${ROUND}`;
-    const lines = wrapText(ctx, text, W - 264).slice(0, maxLines);
-    lines.forEach((l, i) => ctx.fillText(l, 132, cy + 38 + i * 34));
-    cy += 38 + lines.length * 34 + 26;
-  };
-  block('이런 때 빛나 ✦', profile.strength, '#d97da6', 2);
-  block('이건 조심 ✧', profile.caution, '#b08bc9', 2);
-
-  // 푸터 (카드 바깥)
-  ctx.strokeStyle = 'rgba(146,116,192,0.18)';
+  /* 10. 지수 */
+  const ruleY = chipY + 84;
+  ctx.strokeStyle = hexToRgba(v.accent, 0.32);
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(132, H - 110);
-  ctx.lineTo(W - 132, H - 110);
+  ctx.moveTo(140, ruleY);
+  ctx.lineTo(W - 140, ruleY);
   ctx.stroke();
 
-  ctx.fillStyle = 'rgba(122,103,150,0.7)';
-  ctx.font = `400 19px ${ROUND}`;
-  ctx.fillText(`${chart.solarText} · ${chart.timeText.replace(' (정오 기준)', '')} · ${chart.fiveElements}`, 132, H - 62);
+  scores.forEach(([label, value], i) => {
+    const x = 236 + i * 304;
+    ctx.fillStyle = v.accent;
+    ctx.font = `700 56px ${SERIF}`;
+    ctx.fillText(String(value), x, ruleY + 74);
+    ctx.fillStyle = hexToRgba(v.light, 0.8);
+    ctx.font = `400 25px ${SANS}`;
+    ctx.fillText(label, x, ruleY + 106);
+    ctx.fillStyle = hexToRgba(v.light, 0.2);
+    ctx.beginPath();
+    ctx.roundRect(x - 70, ruleY + 120, 140, 5, 2.5);
+    ctx.fill();
+    ctx.fillStyle = hexToRgba(v.accent, 0.95);
+    ctx.beginPath();
+    ctx.roundRect(x - 70, ruleY + 120, (140 * value) / 100, 5, 2.5);
+    ctx.fill();
+  });
 
-  ctx.fillStyle = '#8f6fe0';
-  ctx.font = `400 20px ${ROUND}`;
+  /* 11. 강점 / 주의 */
+  const blockY = ruleY + 160;
+  ctx.strokeStyle = hexToRgba(v.accent, 0.32);
+  ctx.beginPath();
+  ctx.moveTo(140, blockY - 34);
+  ctx.lineTo(W - 140, blockY - 34);
+  ctx.stroke();
+
+  const blocks: Array<[string, string, string]> = [
+    ['이런 때 빛나 ✦', profile.strength, hexToRgba(v.light, 0.94)],
+    ['이건 조심 ✧', profile.caution, hexToRgba(v.light, 0.8)],
+  ];
+  blocks.forEach(([label, text, tone], i) => {
+    const x = 140 + i * 404;
+    const maxW = 380;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = i === 0 ? hexToRgba(v.accent, 0.95) : hexToRgba(v.light, 0.8);
+    ctx.font = `500 25px ${SANS}`;
+    drawTracked(ctx, label, x, blockY, 2);
+    const fitted = fitText(ctx, text, maxW, i === 0 ? 4 : 3, [28, 26, 24], ROUND);
+    ctx.fillStyle = tone;
+    ctx.font = `400 ${fitted.size}px ${ROUND}`;
+    fitted.lines.forEach((l, li) => ctx.fillText(l, x, blockY + 40 + li * 36));
+  });
+
+  /* 12. 푸터 */
+  ctx.strokeStyle = hexToRgba(v.accent, 0.3);
+  ctx.beginPath();
+  ctx.moveTo(140, H - 120);
+  ctx.lineTo(W - 140, H - 120);
+  ctx.stroke();
+
+  ctx.textAlign = 'left';
+  ctx.fillStyle = hexToRgba(v.light, 0.78);
+  ctx.font = `400 26px ${SANS}`;
+  ctx.fillText(`${chart.solarText} · ${chart.timeText.replace(' (정오 기준)', '')} · ${chart.fiveElements}`, 140, H - 74);
+
   ctx.textAlign = 'right';
-  ctx.fillText('별의 속삭임 ✦', W - 132, H - 62);
+  ctx.fillStyle = hexToRgba(v.accent, 0.95);
+  ctx.font = `400 28px ${ROUND}`;
+  ctx.fillText('별의 속삭임 ✦', W - 140, H - 74);
   ctx.textAlign = 'left';
 
   return canvas.toDataURL('image/png');
