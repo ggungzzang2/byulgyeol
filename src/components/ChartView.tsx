@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import type { ChartModel, PalaceView } from '../lib/chart';
 import { buildTeaser, deepProfileOf, palaceScore, profileOf } from '../lib/content';
-import { CHARACTER_FIRST_PRICE, PRODUCTS, productBadge, productPoints, productPrice, productScopeShort, productShortCta, productTagline, type ProductId } from '../lib/products';
+import { CHARACTER_FIRST_PRICE, PRODUCTS, WESTERN_PRODUCTS, ZIWEI_PRODUCTS, productBadge, productPoints, productPrice, productScopeShort, productShortCta, productTagline, type ProductId } from '../lib/products';
+import type { SystemId } from '../lib/systems';
 import { STAR_HANJA } from '../lib/terms';
 import { THEME_ART, useTheme } from '../lib/theme';
 import { guardianRecommendation } from '../lib/guardianGoods';
@@ -10,16 +11,19 @@ import { starGlowStyle, starGuardian, starVisual } from '../lib/starPalette';
 import StarEmblem from './StarEmblem';
 import ChartBoard from './ChartBoard';
 import PalaceDetail from './PalaceDetail';
+import SystemTabs from './SystemTabs';
 import { ArrowIcon, LockIcon, SectionLabel, StarMark } from './ui';
 
 type Props = {
   chart: ChartModel;
+  system: SystemId;
+  onSystemChange: (system: SystemId) => void;
   onReset: () => void;
   onUnlock: (id: ProductId) => void;
   onAiReport: () => void;
 };
 
-export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Props) {
+export default function ChartView({ chart, system, onSystemChange, onReset, onUnlock, onAiReport }: Props) {
   const { theme, copy } = useTheme();
   const isCharacter = theme === 'character';
   const [selected, setSelected] = useState<PalaceView>(chart.soulPalace);
@@ -110,6 +114,14 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="mx-auto max-w-6xl px-5 pt-4 sm:px-8">
+        <SystemTabs
+          system={system}
+          onChange={onSystemChange}
+          note="지금 보고 있는 체계: 동양 전통 자미두수 · 12궁 명반. 같은 생년월일시로 서양 점성술 천궁도도 볼 수 있어요."
+        />
       </div>
 
       <div className="mx-auto max-w-6xl px-5 pt-8 sm:px-8 sm:pt-10">
@@ -313,9 +325,9 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
 
                   <div className="mt-4 space-y-3.5">
                     {[
-                      { label: '재물', score: moneyScore },
+                      { label: '금전', score: moneyScore },
                       { label: '연애', score: loveScore },
-                      { label: '직업', score: workScore },
+                      { label: '일', score: workScore },
                     ].map((s, i) => (
                       <div key={s.label}>
                         <div className="flex items-end justify-between">
@@ -572,8 +584,18 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
         {/* 상품 */}
         <section className="mt-12">
           <SectionLabel index="03">{copy.chart.productsSection}</SectionLabel>
-          <div className="mt-4 grid gap-3.5 lg:grid-cols-3">
-            {PRODUCTS.map((p) => (
+          <div className="mt-4 space-y-7">
+            {[
+              { label: '① 동양 전통 자미두수 · 12궁 명반', items: ZIWEI_PRODUCTS },
+              { label: '② 서양 점성술 · 출생 천궁도', items: WESTERN_PRODUCTS },
+            ].map((group) => (
+              <div key={group.label}>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-[11.5px] font-semibold t-body">{group.label}</span>
+                  <span className="h-px flex-1" style={{ background: 'var(--line)' }} />
+                </div>
+                <div className="mt-3 grid gap-3.5 lg:grid-cols-3">
+            {group.items.map((p) => (
               <div key={p.id} className="t-card flex flex-col p-5">
                 <div className="flex items-baseline justify-between gap-2">
                   <h3 className="t-title text-[16px]">{p.name}</h3>
@@ -609,6 +631,9 @@ export default function ChartView({ chart, onReset, onUnlock, onAiReport }: Prop
                 </div>
               </div>
             ))}
+              </div>
+            </div>
+          ))}
           </div>
         </section>
 

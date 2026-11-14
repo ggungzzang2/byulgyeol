@@ -8,15 +8,38 @@ type Props = {
   onSubmit: (input: BirthInput) => void;
   onSample: () => void;
   variant?: 'hero' | 'inline';
+  /** 어느 체계를 계산하는 폼인지 — 제목·버튼 문구가 달라집니다. */
+  mode?: 'ziwei' | 'western';
+};
+
+const WESTERN_FORM = {
+  eyebrow: '出生天宮圖 · 무료 계산',
+  title: '태어난 하늘의 좌표를 알려주세요',
+  titleChar: '태어난 하늘의 좌표를 알려줘',
+  desc: '같은 생년월일시로 태양·달·어센던트와 행성의 하우스를 그립니다.',
+  submit: '내 천궁도 열기',
+  sample: '예시 천궁도로 먼저 보기',
+  timeHint: '시간을 모르면 어센던트와 하우스가 정오 기준으로 계산됩니다.',
+  nameLabel: '천궁도에 새길 이름',
 };
 
 const YEARS = Array.from({ length: 2015 - 1930 + 1 }, (_, i) => 2015 - i);
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const daysIn = (y: number, m: number) => new Date(y, m, 0).getDate();
 
-export default function BirthForm({ onSubmit, onSample, variant = 'hero' }: Props) {
+export default function BirthForm({ onSubmit, onSample, variant = 'hero', mode = 'ziwei' }: Props) {
   const { theme, copy } = useTheme();
   const isCharacter = theme === 'character';
+  const isWestern = mode === 'western';
+  const label = {
+    eyebrow: isWestern ? WESTERN_FORM.eyebrow : copy.form.eyebrow,
+    title: isWestern ? (isCharacter ? WESTERN_FORM.titleChar : WESTERN_FORM.title) : copy.form.title,
+    desc: isWestern ? WESTERN_FORM.desc : copy.form.desc,
+    submit: isWestern ? WESTERN_FORM.submit : copy.form.submit,
+    sample: isWestern ? WESTERN_FORM.sample : copy.form.sample,
+    timeHint: isWestern ? WESTERN_FORM.timeHint : copy.form.timeHint,
+    nameLabel: isWestern ? WESTERN_FORM.nameLabel : isCharacter ? '별지도에 새길 이름' : '이름',
+  };
   const [name, setName] = useState('');
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
@@ -75,12 +98,12 @@ export default function BirthForm({ onSubmit, onSample, variant = 'hero' }: Prop
 
       <div className="relative mb-6 flex items-start justify-between gap-3">
         <div>
-          <p className="eyebrow">{copy.form.eyebrow}</p>
+          <p className="eyebrow">{label.eyebrow}</p>
           <h2 className="t-title mt-2 text-[21px] leading-snug sm:text-[23px]">
-            {copy.form.title}
+            {label.title}
             {isCharacter && <span className="ml-1 align-middle text-[15px] text-[#c7a7f0]">✧</span>}
           </h2>
-          <p className="mt-1.5 text-[12px] leading-relaxed t-muted">{copy.form.desc}</p>
+          <p className="mt-1.5 text-[12px] leading-relaxed t-muted">{label.desc}</p>
         </div>
         {isCharacter ? (
           <span className="guardian-avatar mt-1 hidden h-11 w-11 shrink-0 sm:block">
@@ -99,7 +122,7 @@ export default function BirthForm({ onSubmit, onSample, variant = 'hero' }: Prop
       <div className="relative space-y-4">
         <div>
           <label className="t-field-label" htmlFor="name">
-            {isCharacter ? '별지도에 새길 이름' : '이름'} <span className="opacity-60">(선택)</span>
+            {label.nameLabel} <span className="opacity-60">(선택)</span>
           </label>
           <input
             id="name"
@@ -216,14 +239,14 @@ export default function BirthForm({ onSubmit, onSample, variant = 'hero' }: Prop
             ))}
             <option value="unknown">{isCharacter ? '시간 모름 (정오 기준)' : '시간 모름 (정오 기준으로 계산)'}</option>
           </select>
-          <p className="mt-2 text-[11px] leading-relaxed t-faint">{copy.form.timeHint}</p>
+          <p className="mt-2 text-[11px] leading-relaxed t-faint">{label.timeHint}</p>
         </div>
       </div>
 
       {error && <p className="relative mt-4 text-[12px] text-[#d98a7a]">{error}</p>}
 
       <button type="submit" className="t-btn t-btn-primary relative mt-6 w-full py-3.5 text-[14px]">
-        {copy.form.submit}
+        {label.submit}
         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
           <path d="M5 12h13M13 6.5L18.5 12 13 17.5" />
         </svg>
@@ -235,7 +258,7 @@ export default function BirthForm({ onSubmit, onSample, variant = 'hero' }: Prop
         className="relative mt-3 w-full text-center text-[12px] underline decoration-1 underline-offset-4 transition t-muted"
         style={{ textDecorationColor: 'var(--line-strong)' }}
       >
-        {copy.form.sample}
+        {label.sample}
       </button>
     </form>
   );

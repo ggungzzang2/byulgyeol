@@ -17,6 +17,7 @@ type Props = {
   onBack: () => void;
   onCompat: () => void;
   onUpgrade: () => void;
+  onBundle: () => void;
 };
 
 function MarkdownLite({ text }: { text: string }) {
@@ -49,7 +50,7 @@ function MarkdownLite({ text }: { text: string }) {
   );
 }
 
-export default function PremiumReport({ chart, tier, focusAi = false, onBack, onCompat, onUpgrade }: Props) {
+export default function PremiumReport({ chart, tier, focusAi = false, onBack, onCompat, onUpgrade, onBundle }: Props) {
   const { theme, copy } = useTheme();
   const isCharacter = theme === 'character';
   const profile = profileOf(chart.primaryStar);
@@ -58,10 +59,9 @@ export default function PremiumReport({ chart, tier, focusAi = false, onBack, on
   const months = monthlyGuide(chart);
   const scores = useMemo(
     () => ({
-      재물: palaceScore(chart.palaces.find((p) => p.name === '재백궁')),
+      금전: palaceScore(chart.palaces.find((p) => p.name === '재백궁')),
       연애: palaceScore(chart.palaces.find((p) => p.name === '부처궁')),
-      직업: palaceScore(chart.palaces.find((p) => p.name === '관록궁')),
-      건강: palaceScore(chart.palaces.find((p) => p.name === '질액궁')),
+      일: palaceScore(chart.palaces.find((p) => p.name === '관록궁')),
     }),
     [chart],
   );
@@ -251,15 +251,14 @@ export default function PremiumReport({ chart, tier, focusAi = false, onBack, on
         <section className="mt-12">
           <SectionLabel index="02">{copy.report.sectionScores}</SectionLabel>
           <div className="t-card mt-4 p-6 sm:p-7">
-            <div className="grid gap-5 sm:grid-cols-2">
-              <ScoreBar label="재물" score={scores.재물} hint={profile.money} delay={0} />
-              <ScoreBar label="연애" score={scores.연애} hint={profile.love} delay={120} />
-              <ScoreBar label="직업" score={scores.직업} hint={profile.work} delay={240} />
-              <ScoreBar label="건강" score={scores.건강} hint={profile.body} delay={360} />
+            <div className="grid gap-5 sm:grid-cols-3">
+              <ScoreBar label="연애의 별" score={scores.연애} hint={profile.love} delay={0} />
+              <ScoreBar label="금전의 별" score={scores.금전} hint={profile.money} delay={120} />
+              <ScoreBar label="일의 별" score={scores.일} hint={profile.work} delay={240} />
             </div>
             <p className="mt-5 pt-4 text-[10.5px] leading-[1.8] t-faint" style={{ borderTop: '1px solid var(--line)' }}>
-              지수는 각 궁의 주성 밝기·사화·보좌성 배치를 합산한 상대값입니다. 높고 낮음이 아니라
-              어디에 힘을 쓰면 되는지를 보는 지표로 읽어 주세요.
+              지수는 각 궁의 주성 밝기·사화·보좌성 배치를 합산한 상대값입니다. 모든 화면과 저장 카드에서 같은
+              세 가지(연애의 별·금전의 별·일의 별)만 보여줍니다.
             </p>
           </div>
         </section>
@@ -558,7 +557,7 @@ export default function PremiumReport({ chart, tier, focusAi = false, onBack, on
 
         <GuardianGoods chart={chart} />
 
-        <MonthlyUpsell chart={chart} />
+        <MonthlyUpsell chart={chart} onBundle={onBundle} />
 
         {/* 마무리 */}
         <section className="mt-12">

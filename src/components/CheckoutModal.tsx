@@ -1,7 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { BirthInput, Gender } from '../lib/chart';
-import type { Product } from '../lib/products';
-import { productPoints, productPrice, productScopeNote, productTagline } from '../lib/products';
+import type { Product, ProductId } from '../lib/products';
+import {
+  PRODUCTS,
+  productOriginalPrice,
+  productPoints,
+  productPrice,
+  productScopeNote,
+  productSystemLabel,
+  productTagline,
+} from '../lib/products';
+import type { ProductSystem } from '../lib/systems';
 import { useTheme } from '../lib/theme';
 import { LockIcon } from './ui';
 
@@ -10,11 +19,19 @@ type Props = {
   chartName: string;
   onClose: () => void;
   onPaid: (partner?: BirthInput) => void;
+  /** 결제 모달 안에서 다른 체계·다른 상품으로 갈아탈 때 */
+  onSelect: (id: ProductId) => void;
 };
 
 const YEARS = Array.from({ length: 2015 - 1930 + 1 }, (_, i) => 2015 - i);
 
-export default function CheckoutModal({ product, chartName, onClose, onPaid }: Props) {
+const LANES: Array<{ key: ProductSystem; label: string; sub: string; glyph: string }> = [
+  { key: 'ziwei', label: '동양 자미두수', sub: '12궁 명반 · 14주성', glyph: '☯' },
+  { key: 'western', label: '서양 점성술', sub: '출생 천궁도 · 행성 하우스', glyph: '✶' },
+  { key: 'both', label: '통합 (둘 다)', sub: '두 리포트 함께', glyph: '✦' },
+];
+
+export default function CheckoutModal({ product, chartName, onClose, onPaid, onSelect }: Props) {
   const { theme, copy } = useTheme();
   const isCharacter = theme === 'character';
   const [agree, setAgree] = useState(false);
@@ -29,6 +46,10 @@ export default function CheckoutModal({ product, chartName, onClose, onPaid }: P
   const [pGender, setPGender] = useState<Gender>('male');
   const [error, setError] = useState<string | null>(null);
 
+  const lane = product.system;
+  const laneProducts = useMemo(() => PRODUCTS.filter((p) => p.system === lane), [lane]);
+  const systemLabel = productSystemLabel(product);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
@@ -38,6 +59,18 @@ export default function CheckoutModal({ product, chartName, onClose, onPaid }: P
       document.body.style.overflow = '';
     };
   }, [onClose]);
+
+  // 결제 동선을 바꾸면 결제 상태만 초기화합니다. (동의 체크는 유지)
+  useEffect(() => {
+    setStage('form');
+    setError(null);
+  }, [product.id]);
+
+  const pickLane = (next: ProductSystem) => {
+    if (next === lane) return;
+    const first = PRODUCTS.find((p) => p.system === next);
+    if (first) onSelect(first.id);
+  };
 
   const pay = () => {
     if (!agree) {
@@ -84,10 +117,17 @@ export default function CheckoutModal({ product, chartName, onClose, onPaid }: P
         className="t-card animate-rise max-h-[92vh] w-full max-w-[460px] overflow-y-auto !rounded-b-none sm:!rounded-b-[26px]"
         style={{ background: 'var(--card-2)' }}
       >
-        <div className="flex items-start justify-between gap-3 px-6 py-5" style={{ borderBottom: '1px solid var(--line)' }}>
+        <div className="flex items-start justify-between gap-3 px-6 pb-4 pt-5" style={{ borderBottom: '1px solid var(--line)' }}>
           <div className="min-w-0">
             <p className="eyebrow">{copy.checkout.eyebrow}</p>
-            <h3 className="t-title mt-1.5 text-[18px] leading-snug">{product.name}</h3>
+            <p
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold"
+              style={{ background: 'var(--accent-soft)', color: 'var(--accent-deep)', border: '1px solid var(--line-strong)' }}
+            >
+              <span aria-hidden="true">{lane === 'western' ? '✶' : lane === 'both' ? '✦' : '☯'}</span>
+              {systemLabel.title}
+            </p>
+            <h3 className="t-title mt-2 text-[18px] leading-snug">{product.name}</h3>
             <p className="mt-0.5 text-[11.5px] t-muted">{productTagline(product, theme)}</p>
             {isCharacter && product.id === 'basic' && (
               <p className="mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px]" style={{ background: 'rgba(255,214,190,0.5)', color: '#a8648a' }}>
@@ -108,7 +148,72 @@ export default function CheckoutModal({ product, chartName, onClose, onPaid }: P
         </div>
 
         <div className="px-6 py-5">
-          <div className="space-y-2 rounded-2xl p-4 text-[12px]" style={{ background: 'var(--field-bg)' }}>
+          {/* 결제 동선 — 자미두수 / 서양 점성술 / 통합 */}
+          <div>
+            <p className="mb-2 text-[10px] font-semibold tracking-[0.1em] t-muted">
+              {isCharacter ? '어떤 리포트를 살까?' : '결제할 리포트 체계'}
+            </p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {LANES.map((l) => {
+                const active = l.key === lane;
+                return (
+                  <button
+                    key={l.key}
+                    type="button"
+                    onClick={() => pickLane(l.key)}
+                    aria-pressed={active}
+                    className="rounded-xl px-1.5 py-2 text-center transition"
+                    style={
+                      active
+                        ? { background: 'var(--accent)', color: 'var(--on-accent)', border: '1px solid var(--accent)' }
+                        : { background: 'transparent', color: 'var(--muted)', border: '1px solid var(--line)' }
+                    }
+                  >
+                    <span className="block text-[12px]" aria-hidden="true">
+                      {l.glyph}
+                    </span>
+                    <span className="mt-0.5 block text-[10px] font-semibold leading-tight">{l.label}</span>
+                    <span className="mt-0.5 block text-[8px] leading-tight opacity-80">{l.sub}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* 같은 체계 안의 상품 */}
+            <div className="mt-2 space-y-1.5">
+              {laneProducts.map((p) => {
+                const active = p.id === product.id;
+                const price = productPrice(p, theme);
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => !active && onSelect(p.id)}
+                    aria-pressed={active}
+                    className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left transition"
+                    style={{
+                      background: active ? 'var(--field-bg)' : 'transparent',
+                      border: active ? '1px solid var(--line-strong)' : '1px dashed var(--line)',
+                    }}
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-[11.5px] font-medium" style={{ color: active ? 'var(--text)' : 'var(--muted)' }}>
+                        {active ? '● ' : '○ '}
+                        {p.name}
+                      </span>
+                      <span className="mt-0.5 block truncate text-[9.5px] t-faint">{p.tagline}</span>
+                    </span>
+                    <span className="num shrink-0 text-[11.5px] font-semibold" style={{ color: active ? 'var(--accent-deep)' : 'var(--muted)' }}>
+                      {price.toLocaleString('ko-KR')}원
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-[9.5px] leading-[1.7] t-faint">{systemLabel.sub}</p>
+          </div>
+
+          <div className="mt-4 space-y-2 rounded-2xl p-4 text-[12px]" style={{ background: 'var(--field-bg)' }}>
             <div className="flex justify-between gap-3 t-muted">
               <span>{copy.checkout.order}</span>
               <span className="truncate t-body">{chartName || '익명'}</span>
@@ -118,15 +223,26 @@ export default function CheckoutModal({ product, chartName, onClose, onPaid }: P
               <span className="truncate t-body">{product.name}</span>
             </div>
             <div className="flex justify-between gap-3 t-muted">
+              <span>체계</span>
+              <span className="truncate t-body">{lane === 'both' ? '동양 + 서양' : lane === 'western' ? '서양 점성술' : '동양 자미두수'}</span>
+            </div>
+            <div className="flex justify-between gap-3 t-muted">
               <span>{copy.checkout.period}</span>
               <span className="t-body">{copy.checkout.periodValue}</span>
             </div>
             <div className="my-1 h-px" style={{ background: 'var(--line)' }} />
             <div className="flex items-end justify-between">
               <span className="t-muted">{copy.checkout.amount}</span>
-              <span className="text-[17px] font-bold t-title">
-                {productPrice(product, theme).toLocaleString('ko-KR')}
-                <span className="ml-0.5 text-[11px] font-normal t-muted">원</span>
+              <span className="flex items-baseline gap-1.5">
+                {productOriginalPrice(product, theme) && (
+                  <span className="num text-[10px] line-through t-faint">
+                    {productOriginalPrice(product, theme)!.toLocaleString('ko-KR')}원
+                  </span>
+                )}
+                <span className="text-[17px] font-bold t-title">
+                  {productPrice(product, theme).toLocaleString('ko-KR')}
+                  <span className="ml-0.5 text-[11px] font-normal t-muted">원</span>
+                </span>
               </span>
             </div>
           </div>
@@ -251,7 +367,11 @@ export default function CheckoutModal({ product, chartName, onClose, onPaid }: P
             {stage === 'form' && (
               <>
                 <LockIcon className="h-3.5 w-3.5" />
-                {copy.checkout.pay(productPrice(product, theme).toLocaleString('ko-KR'))}
+                {lane === 'western'
+                  ? `서양 점성술 리포트 ${productPrice(product, theme).toLocaleString('ko-KR')}원 결제하고 열기`
+                  : lane === 'both'
+                    ? `통합 리포트 ${productPrice(product, theme).toLocaleString('ko-KR')}원 결제하고 열기`
+                    : copy.checkout.pay(productPrice(product, theme).toLocaleString('ko-KR'))}
               </>
             )}
             {stage === 'processing' && (

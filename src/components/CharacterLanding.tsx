@@ -2,6 +2,8 @@ import type { BirthInput } from '../lib/chart';
 import {
   CHARACTER_FIRST_PRICE,
   PRODUCTS,
+  WESTERN_PRODUCTS,
+  ZIWEI_PRODUCTS,
   productBadge,
   productCta,
   productOriginalPrice,
@@ -11,14 +13,19 @@ import {
   productTagline,
   type ProductId,
 } from '../lib/products';
+import type { SystemId } from '../lib/systems';
 import { THEME_ART, useTheme } from '../lib/theme';
 import BirthForm from './BirthForm';
+import SystemTabs from './SystemTabs';
+import WesternLanding from './WesternLanding';
 import { SectionLabel, StarMark } from './ui';
 
 type Props = {
   onSubmit: (input: BirthInput) => void;
   onSample: () => void;
   onProduct: (id: ProductId) => void;
+  system: SystemId;
+  onSystemChange: (system: SystemId) => void;
 };
 
 const SPARKLES: Array<{ top: string; left: string; size: number; delay: string; opacity: number }> = [
@@ -45,8 +52,9 @@ function SparkleField() {
   );
 }
 
-function CharacterHeader() {
+function CharacterHeader({ system }: { system: SystemId }) {
   const { copy } = useTheme();
+  const western = system === 'western';
   return (
     <header
       className="sticky top-0 z-30 no-print"
@@ -68,12 +76,21 @@ function CharacterHeader() {
           </span>
         </a>
         <nav className="hidden items-center gap-6 text-[12px] text-[#6a5788] sm:flex">
-          <a href="#chart">내 별</a>
-          <a href="#collection">별 컬렉션</a>
-          <a href="#reports">별 이야기</a>
+          {western ? (
+            <>
+              <a href="#western-chart">내 천궁도</a>
+              <a href="#western-reports">서양 리포트</a>
+            </>
+          ) : (
+            <>
+              <a href="#chart">내 별</a>
+              <a href="#collection">별 컬렉션</a>
+              <a href="#reports">별 이야기</a>
+            </>
+          )}
         </nav>
-        <a href="#chart" className="t-btn t-btn-primary px-4 py-2.5 text-[11.5px]">
-          {copy.headerCta}
+        <a href={western ? '#western-chart' : '#chart'} className="t-btn t-btn-primary px-4 py-2.5 text-[11.5px]">
+          {western ? '내 천궁도 보기' : copy.headerCta}
         </a>
       </div>
     </header>
@@ -94,13 +111,18 @@ function LuckRing({ score }: { score: number }) {
   );
 }
 
-export default function CharacterLanding({ onSubmit, onSample, onProduct }: Props) {
+export default function CharacterLanding({ onSubmit, onSample, onProduct, system, onSystemChange }: Props) {
   const { copy } = useTheme();
 
   return (
     <div id="top">
-      <CharacterHeader />
+      <CharacterHeader system={system} />
+      <SystemTabs system={system} onChange={onSystemChange} />
 
+      {system === 'western' ? (
+        <WesternLanding onSubmit={onSubmit} onSample={onSample} onProduct={onProduct} />
+      ) : (
+        <>
       {/* HERO */}
       <section className="relative overflow-hidden">
         <SparkleField />
@@ -180,12 +202,11 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
               <LuckRing score={78} />
             </div>
 
-            <div className="mt-4 grid grid-cols-4 gap-1.5 border-t pt-3" style={{ borderColor: 'rgba(146,116,192,0.12)' }}>
+            <div className="mt-4 grid grid-cols-3 gap-1.5 border-t pt-3" style={{ borderColor: 'rgba(146,116,192,0.12)' }}>
               {[
-                { icon: '💗', label: '연애운', value: 80 },
-                { icon: '💰', label: '금전운', value: 70 },
-                { icon: '🍀', label: '업무운', value: 75 },
-                { icon: '💧', label: '건강운', value: 65 },
+                { icon: '💗', label: '연애의 별', value: 80 },
+                { icon: '💰', label: '금전의 별', value: 70 },
+                { icon: '🍀', label: '일의 별', value: 75 },
               ].map((s) => (
                 <div key={s.label} className="text-center">
                   <span className="text-[15px]" aria-hidden="true">
@@ -216,11 +237,11 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
 
         <div className="mt-4 grid grid-cols-5 gap-2 sm:gap-3">
           {[
-            { name: '설렘의 별', gain: '연애운 +10%', glyph: '★', color: '#ffb3c7', bg: 'linear-gradient(180deg,#fff0f5,#ffe3ec)', tag: 'NEW' },
-            { name: '용기의 별', gain: '업무운 +10%', glyph: '★', color: '#8fb6ff', bg: 'linear-gradient(180deg,#eff5ff,#e3edff)' },
-            { name: '직관의 별', gain: '전체운 +5%', glyph: '★', color: '#b395f5', bg: 'linear-gradient(180deg,#f6efff,#ece2ff)', tag: '3' },
-            { name: '풍요의 별', gain: '금전운 +10%', glyph: '★', color: '#f0c16a', bg: 'linear-gradient(180deg,#fff9ec,#fff2d9)', tag: '2' },
-            { name: '평온의 별', gain: '건강운 +10%', glyph: '★', color: '#7fd4b8', bg: 'linear-gradient(180deg,#effcf7,#e2f7ef)', tag: '1' },
+            { name: '설렘의 별', gain: '연애의 별 +10%', glyph: '★', color: '#ffb3c7', bg: 'linear-gradient(180deg,#fff0f5,#ffe3ec)', tag: 'NEW' },
+            { name: '용기의 별', gain: '일의 별 +10%', glyph: '★', color: '#8fb6ff', bg: 'linear-gradient(180deg,#eff5ff,#e3edff)' },
+            { name: '직관의 별', gain: '세 별 고르게 +3%', glyph: '★', color: '#b395f5', bg: 'linear-gradient(180deg,#f6efff,#ece2ff)', tag: '3' },
+            { name: '풍요의 별', gain: '금전의 별 +10%', glyph: '★', color: '#f0c16a', bg: 'linear-gradient(180deg,#fff9ec,#fff2d9)', tag: '2' },
+            { name: '평온의 별', gain: '일의 별 +5%', glyph: '★', color: '#7fd4b8', bg: 'linear-gradient(180deg,#effcf7,#e2f7ef)', tag: '1' },
           ].map((b) => (
             <div key={b.name} className="star-badge relative" style={{ background: b.bg }}>
               {b.tag && (
@@ -310,14 +331,25 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
       {/* REPORTS */}
       <section id="reports" className="mx-auto mt-14 max-w-5xl scroll-mt-20 px-5 sm:px-8">
         <SectionLabel index="✧">STORY BOOKS</SectionLabel>
-        <h2 className="t-display mt-3 text-[23px] text-[#4d3a6d]">별 이야기 세 권</h2>
-        <p className="mt-2 max-w-[340px] text-[12px] leading-[1.9] text-[#6a5788]">
-          첫 이야기는 <b className="font-semibold text-[#7c59cf]">커피 한 잔 값({CHARACTER_FIRST_PRICE.toLocaleString('ko-KR')}원)</b>이야.
+        <h2 className="t-display mt-3 text-[23px] text-[#4d3a6d]">별 이야기 다섯 권</h2>
+        <p className="mt-2 max-w-[360px] text-[12px] leading-[1.9] text-[#6a5788]">
+          동양 자미두수 세 권, 서양 점성술 두 권. 첫 이야기는{' '}
+          <b className="font-semibold text-[#7c59cf]">커피 한 잔 값({CHARACTER_FIRST_PRICE.toLocaleString('ko-KR')}원)</b>이야.
           가볍게 시작하고, 더 궁금할 때만 다음 책을 펼쳐.
         </p>
 
-        <div className="mt-5 grid gap-3.5 sm:grid-cols-3">
-          {PRODUCTS.map((p) => (
+        <div className="mt-5 space-y-6">
+          {[
+            { label: '① 동양 전통 자미두수 · 12궁 명반', items: ZIWEI_PRODUCTS },
+            { label: '② 서양 점성술 · 출생 천궁도', items: WESTERN_PRODUCTS },
+          ].map((group) => (
+            <div key={group.label}>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold text-[#5b4382]">{group.label}</span>
+                <span className="h-px flex-1" style={{ background: 'rgba(146,116,192,0.22)' }} />
+              </div>
+              <div className="mt-2.5 grid gap-3.5 sm:grid-cols-3">
+          {group.items.map((p) => (
             <div
               key={p.id}
               className="relative flex flex-col p-5"
@@ -379,14 +411,17 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
               </button>
             </div>
           ))}
+              </div>
+            </div>
+          ))}
         </div>
         <p className="mt-4 text-center text-[10.5px] text-[#75628f]">
           1회 결제 · 언제든 다시 보기 · 별지도는 서버에 저장하지 않아
         </p>
         <div className="mt-3 rounded-2xl px-4 py-3 text-center" style={{ background: 'rgba(255,255,255,0.7)', border: '1px dashed rgba(146,116,192,0.25)' }}>
           <p className="text-[10.5px] leading-[1.8] text-[#6a5788]">
-            곧 · <b className="text-[#7c59cf]">매달 1일 월간 별빛 편지</b>(구독)와{' '}
-            <b className="text-[#7c59cf]">서양 별자리까지 함께 읽는 통합 리포트</b>도 준비 중이야.
+            곧 · <b className="text-[#7c59cf]">매달 1일 월간 별빛 편지</b>(구독)가 열려. 서양 별자리까지 함께 읽는{' '}
+            <b className="text-[#7c59cf]">통합 리포트</b>는 위에서 바로 결제할 수 있어.
           </p>
         </div>
       </section>
@@ -415,6 +450,8 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
           </div>
         </div>
       </section>
+        </>
+      )}
 
       <footer className="mt-10 pb-24 sm:pb-12">
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
@@ -426,8 +463,9 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct }: Prop
             <span className="text-[10px] text-[#c9b6e4]">✧</span>
           </div>
           <p className="mt-2 text-[10.5px] leading-[1.9] text-[#75628f]">
-            자미두수는 전통 상담 문화야. 이 이야기는 오락과 자기 이해를 위한 콘텐츠이고,
-            의료·법률·투자 같은 중요한 결정의 근거로는 쓸 수 없어.
+            {system === 'western'
+              ? '서양 점성술은 오락과 자기 이해를 위한 콘텐츠야. 의료·법률·투자 같은 중요한 결정의 근거로는 쓸 수 없어. 출생지는 서울 기준으로 계산했어.'
+              : '자미두수는 전통 상담 문화야. 이 이야기는 오락과 자기 이해를 위한 콘텐츠이고, 의료·법률·투자 같은 중요한 결정의 근거로는 쓸 수 없어.'}
             <br />© 2026 {copy.brand.name}. 프로토타입.
           </p>
         </div>

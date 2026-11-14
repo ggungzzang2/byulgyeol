@@ -55,10 +55,9 @@ export function chartToPromptText(chart: ChartModel): string {
   });
 
   const scores = {
-    재물: palaceScore(chart.palaces.find((p) => p.name === '재백궁')),
+    금전: palaceScore(chart.palaces.find((p) => p.name === '재백궁')),
     연애: palaceScore(chart.palaces.find((p) => p.name === '부처궁')),
-    직업: palaceScore(chart.palaces.find((p) => p.name === '관록궁')),
-    건강: palaceScore(chart.palaces.find((p) => p.name === '질액궁')),
+    일: palaceScore(chart.palaces.find((p) => p.name === '관록궁')),
   };
 
   return [
@@ -70,7 +69,8 @@ export function chartToPromptText(chart: ChartModel): string {
     `명궁: ${chart.soulPalace.name}(${chart.soulPalace.stem}${chart.soulPalace.branch}) / 신궁: ${chart.bodyPalace.name}`,
     `현재 대한: ${chart.decadal.range[0]}~${chart.decadal.range[1]}세(${chart.decadal.name})`,
     `올해(${chart.yearly.year}) 유년 간지: ${chart.yearly.stemBranch}, 유년 사화: ${chart.yearly.mutagen.map((m) => `${m.name}(${m.mutagen})`).join(', ')}`,
-    `지수: 재물 ${scores.재물} / 연애 ${scores.연애} / 직업 ${scores.직업} / 건강 ${scores.건강}`,
+    `지수: 금전 ${scores.금전} / 연애 ${scores.연애} / 일 ${scores.일}`,
+    '(지수는 위 세 가지만 씁니다. 건강 지수나 다른 지수를 새로 만들지 마세요.)',
     '',
     '12궁:',
     ...palaceLines,

@@ -1,9 +1,12 @@
 import type { ThemeId } from './theme';
+import type { ProductSystem } from './systems';
 
-export type ProductId = 'basic' | 'premium' | 'compat';
+export type ProductId = 'basic' | 'premium' | 'compat' | 'western' | 'bundle';
 
 export type Product = {
   id: ProductId;
+  /** 어느 체계의 리포트인지 — 결제 동선을 나누는 기준 */
+  system: ProductSystem;
   name: string;
   hanja: string;
   price: number;
@@ -17,6 +20,7 @@ export type Product = {
 export const PRODUCTS: Product[] = [
   {
     id: 'basic',
+    system: 'ziwei',
     name: '내 인생 사용설명서',
     hanja: '人生使用說明書',
     price: 4900,
@@ -26,6 +30,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 'premium',
+    system: 'ziwei',
     name: '프리미엄 12궁 & 운세 풀 리포트',
     hanja: '十二宮 全解',
     price: 12900,
@@ -33,7 +38,7 @@ export const PRODUCTS: Product[] = [
     tagline: '12궁 전체 + 올해·10년 흐름',
     points: [
       '12궁별 상세 풀이 (궁마다 3문단)',
-      '재물·연애·직업·건강 지수',
+      '금전·연애·일 3지수',
       '대한(10년) · 유년(올해) 흐름',
       '월별 액션 가이드 12개',
       '사화·보좌성 총정리',
@@ -43,13 +48,50 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 'compat',
+    system: 'ziwei',
     name: '두 사람 자미두수 궁합',
     hanja: '緣分 合婚',
     price: 9900,
     tagline: '우리가 오래 가는 조건',
     points: ['두 사람 명반 비교', '감정·생활·장기 궁합 지수', '부딪히는 지점과 넘는 법', '함께할 때의 최적 역할 분담'],
   },
+  {
+    id: 'western',
+    system: 'western',
+    name: '출생 천궁도 리포트',
+    hanja: '出生天宮圖',
+    price: 4900,
+    originalPrice: 6900,
+    tagline: '태양 · 달 · 어센던트 + 행성 7개의 하우스',
+    points: [
+      '태양·달·어센던트 심층 해설',
+      '행성 7개의 자리와 하우스',
+      '12하우스 삶의 영역 풀이',
+      '주요 각(합·삼분·사분) 해석',
+      '금전·연애·일 3지수',
+    ],
+  },
+  {
+    id: 'bundle',
+    system: 'both',
+    name: '동양 × 서양 통합 리포트',
+    hanja: '東西統合',
+    price: 14900,
+    originalPrice: 17800,
+    tagline: '자미두수 12궁 + 서양 천궁도를 교차 해석',
+    points: [
+      '자미두수 12궁 전체 해설',
+      '서양 천궁도 전체 해설',
+      '두 체계가 같은 지점을 가리킬 때의 교차 해석',
+      '올해 흐름과 월별 가이드',
+      '금전·연애·일 3지수',
+    ],
+    badge: '둘 다 한 번에',
+  },
 ];
+
+export const ZIWEI_PRODUCTS = PRODUCTS.filter((p) => p.system === 'ziwei');
+export const WESTERN_PRODUCTS = PRODUCTS.filter((p) => p.system === 'western' || p.system === 'both');
 
 /**
  * 테마별 판매가.
@@ -59,22 +101,30 @@ export const PRODUCTS: Product[] = [
  */
 export const CHARACTER_FIRST_PRICE = 3900;
 export const CHARACTER_COMPAT_PRICE = 6900;
+export const CHARACTER_WESTERN_PRICE = 3900;
+export const CHARACTER_BUNDLE_PRICE = 12900;
 
 export function productPrice(product: Product, theme: ThemeId): number {
   if (theme === 'character') {
     if (product.id === 'basic') return CHARACTER_FIRST_PRICE;
     if (product.id === 'compat') return CHARACTER_COMPAT_PRICE;
+    if (product.id === 'western') return CHARACTER_WESTERN_PRICE;
+    if (product.id === 'bundle') return CHARACTER_BUNDLE_PRICE;
   }
   return product.price;
 }
 
 export function productOriginalPrice(product: Product, theme: ThemeId): number | undefined {
   if (theme === 'character' && product.id === 'compat') return 9900;
+  if (theme === 'character' && product.id === 'western') return 6900;
+  if (theme === 'character' && product.id === 'bundle') return 16800;
   return product.originalPrice;
 }
 
 export function productTagline(product: Product, theme: ThemeId): string {
   if (theme === 'character' && product.id === 'basic') return '명궁·연애·재물·진로·배우자상 핵심만, 커피 한 잔 값으로';
+  if (theme === 'character' && product.id === 'western') return '네가 태어난 하늘의 좌표 — 태양·달·어센던트';
+  if (theme === 'character' && product.id === 'bundle') return '동양 별지도 + 서양 천궁도, 한 번에';
   return product.tagline;
 }
 
@@ -86,6 +136,24 @@ export function productPoints(product: Product, theme: ThemeId): string[] {
       '어울리는 진로 · 전공 3가지',
       '돈이 새는 장면 · 들어오는 경로',
       '올해 조심할 별방 하나',
+    ];
+  }
+  if (theme === 'character' && product.id === 'western') {
+    return [
+      '태양·달·어센던트 세 개의 좌표',
+      '행성 7개가 앉은 하우스',
+      '12개 하우스별 삶의 영역 풀이',
+      '주요 각(합·삼분·사분) 해석',
+      '금전·연애·일 3지수',
+    ];
+  }
+  if (theme === 'character' && product.id === 'bundle') {
+    return [
+      '동양 별지도 12개 별방 전체',
+      '서양 천궁도 12하우스 전체',
+      '두 체계가 같은 곳을 가리킬 때의 교차 해석',
+      '올해 흐름과 달마다 처방',
+      '금전·연애·일 3지수',
     ];
   }
   return product.points;
@@ -103,6 +171,15 @@ export function productScopeShort(product: Product, theme: ThemeId): string | nu
   if (product.id === 'premium') {
     return '12궁 전체 + 월별 액션 가이드 12개 포함';
   }
+  if (product.id === 'western') {
+    return '서양 점성술 단독 · 자미두수 12궁은 포함되지 않음';
+  }
+  if (product.id === 'bundle') {
+    const sum =
+      productPrice(findProduct('premium'), theme) + productPrice(findProduct('western'), theme);
+    const save = sum - productPrice(product, theme);
+    return `두 리포트를 따로 결제하면 ${sum.toLocaleString('ko-KR')}원 — ${save.toLocaleString('ko-KR')}원 저렴`;
+  }
   return null;
 }
 
@@ -119,11 +196,23 @@ export function productScopeNote(product: Product, theme: ThemeId): string | nul
       ? `12개 별방 전체 해설과 달마다 처방까지 모두 담긴 리포트야. (${premiumPrice}원)`
       : `12궁 전체 해설과 월별 액션 가이드 12개까지 모두 담긴 리포트입니다. (${premiumPrice}원)`;
   }
+  if (product.id === 'western') {
+    return theme === 'character'
+      ? '태양·달·어센던트, 행성 7개의 자리와 하우스, 12개 하우스 풀이까지 담긴 서양 점성술 리포트야. 동양 자미두수 해설은 들어 있지 않아 — 그건 다른 리포트야!'
+      : '태양·달·어센던트, 행성 7개의 자리와 하우스, 12하우스 풀이까지 담긴 서양 점성술 리포트입니다. 동양 자미두수 해설은 포함되지 않습니다.';
+  }
+  if (product.id === 'bundle') {
+    return theme === 'character'
+      ? '동양 자미두수 12개 별방 전체와 서양 천궁도 전체를 한 번에 여는 리포트야. 두 체계가 같은 곳을 가리킬 때의 교차 해석까지 들어 있어.'
+      : '동양 자미두수 12궁 전체와 서양 출생 천궁도 전체를 함께 여는 리포트입니다. 두 체계가 같은 지점을 가리킬 때의 교차 해석까지 포함합니다.';
+  }
   return null;
 }
 
 export function productBadge(product: Product, theme: ThemeId): string | undefined {
   if (theme === 'character' && product.id === 'basic') return '☕ 커피 한 잔 값';
+  if (theme === 'character' && product.id === 'western') return '✶ 서양 점성술';
+  if (theme === 'character' && product.id === 'bundle') return '✦ 통합';
   return product.badge;
 }
 
@@ -131,18 +220,39 @@ export function productCta(product: Product, theme: ThemeId): string {
   if (theme === 'character') {
     if (product.id === 'basic') return '3,900원으로 내 별 읽기';
     if (product.id === 'premium') return '12개 별방 전부 보기';
+    if (product.id === 'western') return '내 천궁도 열기';
+    if (product.id === 'bundle') return '동양·서양 둘 다 보기';
     return '두 사람 별 이야기 보기';
   }
-  return product.id === 'compat' ? '궁합 보기' : '명반 입력하고 시작하기';
+  if (product.id === 'compat') return '궁합 보기';
+  if (product.id === 'western') return '내 천궁도 열기';
+  if (product.id === 'bundle') return '통합 리포트 열기';
+  return '명반 입력하고 시작하기';
 }
 
 export function productShortCta(product: Product, theme: ThemeId): string {
   if (theme === 'character') {
     if (product.id === 'basic') return '3,900원으로 열기';
     if (product.id === 'premium') return '전체 보기';
+    if (product.id === 'western') return '천궁도 열기';
+    if (product.id === 'bundle') return '둘 다 보기';
     return '궁합 보기';
   }
-  return product.id === 'compat' ? '궁합 보기' : '열기';
+  if (product.id === 'compat') return '궁합 보기';
+  if (product.id === 'western') return '천궁도 열기';
+  if (product.id === 'bundle') return '통합 보기';
+  return '열기';
+}
+
+/** 결제 모달 상단에 붙는 체계 표기 — 어떤 체계를 사는지 한 줄로 못 박습니다. */
+export function productSystemLabel(product: Product): { title: string; sub: string } {
+  if (product.system === 'western') {
+    return { title: '서양 점성술 · 출생 천궁도', sub: 'WESTERN NATAL CHART · 태양 · 달 · 어센던트 · 행성 하우스' };
+  }
+  if (product.system === 'both') {
+    return { title: '통합 리포트 · 동양 + 서양', sub: 'ZI WEI DOU SHU × WESTERN NATAL · 두 체계 교차 해석' };
+  }
+  return { title: '동양 전통 자미두수 · 12궁 명반', sub: 'ZI WEI DOU SHU · 12궁 · 14주성 · 사화 · 대한' };
 }
 
 export const findProduct = (id: ProductId) => PRODUCTS.find((p) => p.id === id)!;

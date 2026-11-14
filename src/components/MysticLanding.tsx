@@ -1,17 +1,23 @@
 import type { BirthInput } from '../lib/chart';
-import { PRODUCTS, productScopeShort, type ProductId } from '../lib/products';
+import { WESTERN_PRODUCTS, ZIWEI_PRODUCTS, productScopeShort, type ProductId } from '../lib/products';
+import type { SystemId } from '../lib/systems';
 import { THEME_ART, useTheme } from '../lib/theme';
 import BirthForm from './BirthForm';
+import SystemTabs from './SystemTabs';
+import WesternLanding from './WesternLanding';
 import { SectionLabel, StarMark } from './ui';
 
 type Props = {
   onSubmit: (input: BirthInput) => void;
   onSample: () => void;
   onProduct: (id: ProductId) => void;
+  system: SystemId;
+  onSystemChange: (system: SystemId) => void;
 };
 
-function MysticHeader({ onHome }: { onHome?: () => void }) {
+function MysticHeader({ onHome, system }: { onHome?: () => void; system: SystemId }) {
   const { copy } = useTheme();
+  const western = system === 'western';
   return (
     <header
       className="sticky top-0 z-30 no-print"
@@ -34,19 +40,32 @@ function MysticHeader({ onHome }: { onHome?: () => void }) {
         </button>
 
         <nav className="hidden items-center gap-8 text-[12.5px] t-muted md:flex">
-          <a href="#chart" className="transition hover:text-[#e3c07b]">
-            {copy.nav.chart}
-          </a>
-          <a href="#reports" className="transition hover:text-[#e3c07b]">
-            {copy.nav.reports}
-          </a>
-          <a href="#faq" className="transition hover:text-[#e3c07b]">
-            {copy.nav.guide}
-          </a>
+          {western ? (
+            <>
+              <a href="#western-chart" className="transition hover:text-[#e3c07b]">
+                천궁도
+              </a>
+              <a href="#western-reports" className="transition hover:text-[#e3c07b]">
+                서양 리포트
+              </a>
+            </>
+          ) : (
+            <>
+              <a href="#chart" className="transition hover:text-[#e3c07b]">
+                {copy.nav.chart}
+              </a>
+              <a href="#reports" className="transition hover:text-[#e3c07b]">
+                {copy.nav.reports}
+              </a>
+              <a href="#faq" className="transition hover:text-[#e3c07b]">
+                {copy.nav.guide}
+              </a>
+            </>
+          )}
         </nav>
 
-        <a href="#chart" className="t-btn t-btn-ghost px-4 py-2.5 text-[12px] sm:px-5">
-          {copy.headerCta}
+        <a href={western ? '#western-chart' : '#chart'} className="t-btn t-btn-ghost px-4 py-2.5 text-[12px] sm:px-5">
+          {western ? '내 천궁도 보기' : copy.headerCta}
         </a>
       </div>
     </header>
@@ -160,13 +179,18 @@ function Hero() {
   );
 }
 
-export default function MysticLanding({ onSubmit, onSample, onProduct }: Props) {
+export default function MysticLanding({ onSubmit, onSample, onProduct, system, onSystemChange }: Props) {
   const { copy } = useTheme();
 
   return (
     <div>
-      <MysticHeader />
+      <MysticHeader system={system} />
+      <SystemTabs system={system} onChange={onSystemChange} />
 
+      {system === 'western' ? (
+        <WesternLanding onSubmit={onSubmit} onSample={onSample} onProduct={onProduct} />
+      ) : (
+        <>
       <Hero />
 
       {/* 입력 */}
@@ -327,16 +351,26 @@ export default function MysticLanding({ onSubmit, onSample, onProduct }: Props) 
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <SectionLabel index="III">REPORTS</SectionLabel>
-            <h2 className="t-display mt-4 text-[26px] leading-[1.35] sm:text-[31px]">필요한 만큼만, 세 개의 문</h2>
+            <h2 className="t-display mt-4 text-[26px] leading-[1.35] sm:text-[31px]">필요한 만큼만, 다섯 개의 문</h2>
           </div>
           <p className="max-w-[330px] text-[12px] leading-[1.9] t-muted">
-            무료 명반으로 충분히 읽고, 더 깊이 보고 싶을 때만 결제하세요.
-            한 번 결제하면 기간 제한 없이 다시 열 수 있습니다.
+            동양 자미두수 세 개, 서양 점성술 두 개. 체계마다 상품이 따로이고, 결제도 따로입니다. 무료 해석으로
+            충분히 읽고, 더 깊이 보고 싶을 때만 결제하세요.
           </p>
         </div>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-3">
-          {PRODUCTS.map((p) => (
+        <div className="mt-8 space-y-8">
+          {[
+            { label: '① 동양 전통 자미두수 · 12궁 명반', items: ZIWEI_PRODUCTS },
+            { label: '② 서양 점성술 · 출생 천궁도', items: WESTERN_PRODUCTS },
+          ].map((group) => (
+            <div key={group.label}>
+              <div className="flex items-center gap-3">
+                <span className="t-title text-[13px]">{group.label}</span>
+                <span className="h-px flex-1" style={{ background: 'var(--line)' }} />
+              </div>
+              <div className="mt-4 grid gap-4 lg:grid-cols-3">
+                {group.items.map((p) => (
             <div
               key={p.id}
               className={`relative flex flex-col p-6 ${p.recommended ? 't-panel' : 't-card'}`}
@@ -385,14 +419,17 @@ export default function MysticLanding({ onSubmit, onSample, onProduct }: Props) 
                 onClick={() => onProduct(p.id)}
                 className={`t-btn mt-6 w-full py-3 text-[12.5px] ${p.recommended ? 't-btn-gold' : 't-btn-ghost'}`}
               >
-                명반 입력하고 시작하기
+                {p.system === 'western' ? '천궁도 입력하고 시작하기' : p.system === 'both' ? '통합 리포트 시작하기' : '명반 입력하고 시작하기'}
               </button>
+            </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
 
         <p className="mt-5 text-center text-[10.5px] t-faint">
-          모든 상품은 1회 결제 · 기간 제한 없이 재열람 · 명반은 서버에 저장하지 않습니다.
+          모든 상품은 1회 결제 · 기간 제한 없이 재열람 · 명반과 천궁도는 서버에 저장하지 않습니다.
         </p>
       </section>
 
@@ -438,13 +475,15 @@ export default function MysticLanding({ onSubmit, onSample, onProduct }: Props) 
           </div>
         </div>
       </section>
+        </>
+      )}
 
-      <MysticFooter />
+      <MysticFooter system={system} />
     </div>
   );
 }
 
-function MysticFooter() {
+function MysticFooter({ system }: { system: SystemId }) {
   const { copy } = useTheme();
   return (
     <footer className="mt-20 border-t" style={{ borderColor: 'var(--line)' }}>
@@ -457,7 +496,9 @@ function MysticFooter() {
               <span className="text-[9px] tracking-[0.3em] t-faint">{copy.brand.hanja}</span>
             </div>
             <p className="mt-3 max-w-sm text-[11.5px] leading-[1.9] t-muted">
-              나만의 자미두수 사용설명서. 열두 궁과 열네 주성을 지금의 언어로 읽습니다.
+              {system === 'western'
+                ? '출생 천궁도로 읽는 나의 좌표. 태양·달·어센던트와 행성의 하우스를 지금의 언어로 읽습니다.'
+                : '나만의 자미두수 사용설명서. 열두 궁과 열네 주성을 지금의 언어로 읽습니다.'}
             </p>
           </div>
           <div className="flex gap-12 text-[11.5px] t-muted">
@@ -468,16 +509,17 @@ function MysticFooter() {
               <p>두 사람 궁합</p>
             </div>
             <div className="space-y-2">
-              <p className="text-[9.5px] tracking-[0.2em] t-faint">안내</p>
+              <p className="text-[9.5px] tracking-[0.2em] t-faint">서양 점성술</p>
+              <p>출생 천궁도</p>
+              <p>동양×서양 통합</p>
               <p>계산 방식</p>
-              <p>환불 정책</p>
-              <p>문의</p>
             </div>
           </div>
         </div>
         <div className="mt-10 border-t pt-6 text-[10.5px] leading-[1.9] t-faint" style={{ borderColor: 'var(--line-soft)' }}>
-          자미두수는 동아시아 전통 상담 문화입니다. 본 리포트는 오락과 자기 이해를 위한 콘텐츠이며,
-          의료·법률·투자 등 중요한 결정의 근거로 사용할 수 없습니다.
+          {system === 'western'
+            ? '서양 점성술은 오락과 자기 이해를 위한 콘텐츠이며, 의료·법률·투자 등 중요한 결정의 근거로 사용할 수 없습니다. 출생지는 서울 기준으로 계산했습니다.'
+            : '자미두수는 동아시아 전통 상담 문화입니다. 본 리포트는 오락과 자기 이해를 위한 콘텐츠이며, 의료·법률·투자 등 중요한 결정의 근거로 사용할 수 없습니다.'}
           <br />© 2026 {copy.brand.name}. 프로토타입.
         </div>
       </div>
