@@ -224,7 +224,7 @@ const CHARACTER: ThemeCopy = {
     boardTitle: (name) => (name ? `${name}의 별지도` : '나의 별지도'),
     boardHint: '별방을 누르면 그 방에 사는 별 이야기가 열려.',
     boardNote: '별방을 누르면 이야기가 열려',
-    teaserFree: '살짝 엿보기',
+    teaserFree: '무료 공개 30%',
     teaserTitle: (year) => `${year}년, 조심해야 할 별방`,
     teaserSub: '아직 안 알려준 이야기',
     teaserCta: '전체 별 이야기 열기',

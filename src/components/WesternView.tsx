@@ -44,8 +44,29 @@ export default function WesternView({ model, onSystemChange, onReset, onUnlock }
       >
         <div className="mx-auto flex h-[62px] max-w-6xl items-center justify-between gap-3 px-5 sm:px-8">
           <div className="flex min-w-0 items-center gap-2.5">
-            <StarMark className="h-3.5 w-3.5 shrink-0" />
-            <span className="t-title shrink-0 text-[15px] tracking-[0.1em]">서양 점성술</span>
+            {/* 로고·타이틀 = 첫 홈으로 */}
+            <button
+              type="button"
+              onClick={onReset}
+              title="첫 화면으로"
+              aria-label="첫 화면으로 돌아가기"
+              className="group flex min-w-0 cursor-pointer items-center gap-2 rounded-full py-1 pr-1.5 transition hover:opacity-90 active:scale-[0.985]"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-3.5 w-3.5 shrink-0 t-faint transition group-hover:-translate-x-0.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <path d="M14.5 6L8.5 12l6 6" />
+              </svg>
+              <StarMark className="h-3.5 w-3.5 shrink-0" />
+              <span className="t-title shrink-0 text-[15px] tracking-[0.1em] underline decoration-1 underline-offset-4 decoration-transparent transition group-hover:decoration-current">
+                서양 점성술
+              </span>
+            </button>
             <span className="hidden h-3 w-px sm:block" style={{ background: 'var(--line-strong)' }} />
             <span className="hidden truncate text-[11.5px] t-muted sm:inline">
               {model.name ? `${model.name} 님의 ` : ''}출생 천궁도 · {model.solarText}

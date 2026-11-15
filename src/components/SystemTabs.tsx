@@ -68,7 +68,7 @@ export default function SystemTabs({ system, onChange, note, compact = false }: 
           );
         })}
       </div>
-      <p className="mt-2 px-1 text-[10px] leading-[1.7]" style={{ color: 'var(--faint)' }}>
+      <p className="mt-2.5 px-1 text-[11.5px] leading-[1.75]" style={{ color: 'var(--muted)' }}>
         {note ??
           '두 체계는 계산 방식도 해석도 완전히 다른 별개의 서비스예요. 고른 체계만 아래에 나옵니다.'}
       </p>

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import type { ChartModel, PalaceView } from '../lib/chart';
 import { buildTeaser, deepProfileOf, palaceScore, profileOf } from '../lib/content';
-import { CHARACTER_FIRST_PRICE, PRODUCTS, WESTERN_PRODUCTS, ZIWEI_PRODUCTS, productBadge, productPoints, productPrice, productScopeShort, productShortCta, productTagline, type ProductId } from '../lib/products';
+import { CHARACTER_FIRST_PRICE, PRODUCTS, WESTERN_PRODUCTS, ZIWEI_PRODUCTS, findProduct, productBadge, productPoints, productPrice, productScopeShort, productShortCta, productTagline, type ProductId } from '../lib/products';
 import type { SystemId } from '../lib/systems';
-import { STAR_HANJA } from '../lib/terms';
+import { MUTAGEN_HINT, STAR_HANJA } from '../lib/terms';
 import { THEME_ART, useTheme } from '../lib/theme';
 import { guardianRecommendation } from '../lib/guardianGoods';
 import { downloadDataUrl, renderShareCard } from '../lib/shareCard';
@@ -21,14 +21,18 @@ type Props = {
   onReset: () => void;
   onUnlock: (id: ProductId) => void;
   onAiReport: () => void;
+  /** 궁합 무료 점수 프리뷰 열기 */
+  onCompatPreview: () => void;
 };
 
-export default function ChartView({ chart, system, onSystemChange, onReset, onUnlock, onAiReport }: Props) {
+export default function ChartView({ chart, system, onSystemChange, onReset, onUnlock, onAiReport, onCompatPreview }: Props) {
   const { theme, copy } = useTheme();
   const isCharacter = theme === 'character';
   const [selected, setSelected] = useState<PalaceView>(chart.soulPalace);
   const [toast, setToast] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  /** '살짝 엿보기'로 미리보기 섹션에 도착했을 때 잠깐 강조 */
+  const [teaserPulse, setTeaserPulse] = useState(false);
   const profile = profileOf(chart.primaryStar);
   const deep = deepProfileOf(chart.primaryStar);
   const guardian = guardianRecommendation(chart, theme);
@@ -43,6 +47,15 @@ export default function ChartView({ chart, system, onSystemChange, onReset, onUn
   const flash = (msg: string) => {
     setToast(msg);
     window.setTimeout(() => setToast(null), 2800);
+  };
+
+  /** '살짝 엿보기' → 미리보기 섹션으로 부드럽게 이동 + 잠깐 하이라이트 */
+  const revealTeaser = () => {
+    const el = document.getElementById('teaser');
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTeaserPulse(true);
+    window.setTimeout(() => setTeaserPulse(false), 2400);
   };
 
   const saveImage = async () => {
@@ -91,14 +104,37 @@ export default function ChartView({ chart, system, onSystemChange, onReset, onUn
       >
         <div className="mx-auto flex h-[62px] max-w-6xl items-center justify-between gap-3 px-5 sm:px-8">
           <div className="flex min-w-0 items-center gap-2.5">
-            {isCharacter ? (
-              <span className="guardian-avatar h-7 w-7 shrink-0">
-                <img src={THEME_ART.character.hero} alt="" className="h-full w-full object-cover" />
+            {/* 로고·타이틀 = 첫 홈으로 (모바일에서도 바로 보이는 홈 동선) */}
+            <button
+              type="button"
+              onClick={onReset}
+              title="첫 화면으로"
+              aria-label="첫 화면으로 돌아가기"
+              className="group flex min-w-0 cursor-pointer items-center gap-2 rounded-full py-1 pr-1.5 transition hover:opacity-90 active:scale-[0.985]"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-3.5 w-3.5 shrink-0 t-faint transition group-hover:-translate-x-0.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <path d="M14.5 6L8.5 12l6 6" />
+              </svg>
+              {isCharacter ? (
+                <span className="guardian-avatar h-7 w-7 shrink-0">
+                  <img src={THEME_ART.character.hero} alt="" className="h-full w-full object-cover" />
+                </span>
+              ) : (
+                <StarMark className="h-3.5 w-3.5 shrink-0" />
+              )}
+              <span
+                className="t-title shrink-0 text-[16px] tracking-[0.12em] underline decoration-1 underline-offset-4 decoration-transparent transition group-hover:decoration-current"
+              >
+                {copy.brand.name}
               </span>
-            ) : (
-              <StarMark className="h-3.5 w-3.5 shrink-0" />
-            )}
-            <span className="t-title shrink-0 text-[16px] tracking-[0.12em]">{copy.brand.name}</span>
+            </button>
             <span className="hidden h-3 w-px sm:block" style={{ background: 'var(--line-strong)' }} />
             <span className="hidden truncate text-[11.5px] t-muted sm:inline">
               {chart.name ? `${chart.name} 님의 ` : ''}
@@ -368,23 +404,43 @@ export default function ChartView({ chart, system, onSystemChange, onReset, onUn
                       <span
                         key={m.cn}
                         className="t-chip !text-[10.5px]"
+                        title={m.mutagen ? MUTAGEN_HINT[m.mutagen] : undefined}
                         style={m.mutagen === '화기' ? { color: theme === 'character' ? '#d97d9a' : '#d98a7a', borderColor: 'rgba(217,138,122,0.3)' } : undefined}
                       >
                         {m.name} {m.mutagen}
                       </span>
                     ))}
                   </div>
+                  {/* 사화 한 줄 풀이 — 처음 보는 사람도 바로 이해하도록 */}
+                  <ul className="mt-2 space-y-0.5">
+                    {chart.yearly.mutagen.map((m) => (
+                      <li key={`hint-${m.cn}`} className="flex gap-1.5 text-[11.5px] leading-[1.6] t-muted">
+                        <span
+                          className="shrink-0 font-semibold"
+                          style={{ color: m.mutagen === '화기' ? (theme === 'character' ? '#c9688a' : '#cf7f6d') : 'var(--accent-deep)' }}
+                        >
+                          {m.mutagen}
+                        </span>
+                        <span>— {m.mutagen ? MUTAGEN_HINT[m.mutagen] : ''}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
                 <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--line)' }}>
-                  <p className="text-[11px] leading-relaxed t-faint">
+                  <p className="text-[12px] leading-[1.75] t-muted">
                     {isCharacter ? '올해 조심할 별방 하나는 아래에 이어져.' : '올해 재물·연애에서 조심할 한 가지는 아래에 이어집니다.'}
                   </p>
-                  <a href="#teaser" className="mt-2 inline-flex items-center gap-1 text-[11.5px] t-body underline decoration-1 underline-offset-4" style={{ textDecorationColor: 'var(--line-strong)' }}>
+                  <button
+                    type="button"
+                    onClick={revealTeaser}
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-semibold t-body transition active:scale-[0.98]"
+                    style={{ background: 'var(--accent-soft)', border: '1px solid var(--line-strong)' }}
+                  >
                     {isCharacter ? '살짝 엿보기' : '맛보기 진단 보기'}
-                    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                       <path d="M12 5v14M6.5 13.5L12 19l5.5-5.5" />
                     </svg>
-                  </a>
+                  </button>
                 </div>
               </div>
 
@@ -517,7 +573,10 @@ export default function ChartView({ chart, system, onSystemChange, onReset, onUn
               <SectionLabel index="02">{copy.chart.boardSection}</SectionLabel>
               <h2 className="t-display mt-3 text-[24px] sm:text-[28px]">{copy.chart.boardTitle(chart.name)}</h2>
             </div>
-            <p className="max-w-[340px] text-[11.5px] leading-[1.8] t-muted">
+            <p
+              className="rounded-2xl py-2.5 pl-3.5 pr-4 text-[13px] font-medium leading-[1.8] t-body sm:max-w-[360px]"
+              style={{ background: 'var(--field-bg)', border: '1px solid var(--line)', borderLeft: '3px solid var(--accent)' }}
+            >
               {copy.chart.boardHint}
             </p>
           </div>
@@ -532,7 +591,14 @@ export default function ChartView({ chart, system, onSystemChange, onReset, onUn
 
         {/* 티저 */}
         <section id="teaser" className="mt-12 scroll-mt-24">
-          <div className="t-panel p-6 sm:p-9">
+          <div
+            className="t-panel p-6 transition-shadow duration-700 sm:p-9"
+            style={
+              teaserPulse
+                ? { boxShadow: '0 0 0 3px var(--accent-soft), 0 0 55px -6px var(--accent)' }
+                : undefined
+            }
+          >
             <div className="t-starfield opacity-40" />
             <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(227,192,123,0.28), transparent 70%)' }} />
             <div className="relative">
@@ -547,7 +613,11 @@ export default function ChartView({ chart, system, onSystemChange, onReset, onUn
                     <span className="opacity-55">{copy.chart.teaserSub}</span>
                   </h2>
                 </div>
-                <span className="rounded-full px-3 py-1 text-[10px]" style={{ border: '1px solid var(--panel-rule)', color: 'var(--panel-accent)' }}>
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10.5px]"
+                  style={{ border: '1px dashed var(--panel-rule)', color: 'var(--panel-text)', background: 'rgba(255,255,255,0.06)' }}
+                >
+                  <LockIcon className="h-2.5 w-2.5" />
                   {copy.chart.teaserFree}
                 </span>
               </div>
@@ -581,9 +651,39 @@ export default function ChartView({ chart, system, onSystemChange, onReset, onUn
           </div>
         </section>
 
+        {/* 궁합 — 무료 점수 먼저, 심층 해석은 유료 */}
+        <section className="mt-12">
+          <SectionLabel index="03">{isCharacter ? '두 사람의 별' : '두 사람의 궁합'}</SectionLabel>
+          <div className="t-card mt-4 p-6 sm:p-7">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="sm:max-w-[520px]">
+                <h2 className="t-display text-[21px] leading-snug sm:text-[24px]">
+                  {isCharacter ? '궁합 점수는 먼저 무료로 봐 ✨' : '궁합 점수는 먼저 무료로'}
+                </h2>
+                <p className="mt-2 text-[12.5px] leading-[1.85] t-body">
+                  {isCharacter
+                    ? '친구·연인의 생년월일만 넣으면 두 사람의 궁합 점수와 한 줄 케미를 바로 보여줄게. 구체적인 관계 해석·끌림 포인트·갈등 주의점은 심층 리포트에서 이어져.'
+                    : '상대방의 생년월일만 넣으면 두 사람의 궁합 점수와 한 줄 케미를 바로 보여드립니다. 구체적인 관계 해석·끌림 포인트·갈등 주의점은 심층 리포트에서 이어집니다.'}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  <span className="t-chip !text-[10.5px]">점수 무료</span>
+                  <span className="t-chip !text-[10.5px]">한 줄 케미 요약</span>
+                  <span className="t-chip !text-[10.5px]">
+                    심층 리포트 {productPrice(findProduct('compat'), theme).toLocaleString('ko-KR')}원
+                  </span>
+                </div>
+              </div>
+              <button onClick={onCompatPreview} className="t-btn t-btn-primary shrink-0 px-5 py-3 text-[12.5px]">
+                <StarMark className="h-3.5 w-3.5" />
+                무료 궁합 점수 보기
+              </button>
+            </div>
+          </div>
+        </section>
+
         {/* 상품 */}
         <section className="mt-12">
-          <SectionLabel index="03">{copy.chart.productsSection}</SectionLabel>
+          <SectionLabel index="04">{copy.chart.productsSection}</SectionLabel>
           <div className="mt-4 space-y-7">
             {[
               { label: '① 동양 전통 자미두수 · 12궁 명반', items: ZIWEI_PRODUCTS },

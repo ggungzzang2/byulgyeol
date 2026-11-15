@@ -1,5 +1,5 @@
 import type { PalaceView } from '../lib/chart';
-import { MUTAGEN_MEANING, BRIGHTNESS_TEXT, TWELVE_STAGES_TEXT } from '../lib/terms';
+import { MUTAGEN_HINT, MUTAGEN_MEANING, BRIGHTNESS_TEXT, TWELVE_STAGES_TEXT } from '../lib/terms';
 import { palaceReadings, palaceScore, minorLine } from '../lib/content';
 import { THEME_ART, useTheme } from '../lib/theme';
 
@@ -87,14 +87,17 @@ export default function PalaceDetail({ palace, onUnlock }: Props) {
                     </span>
                   )}
                   {s.mutagen && (
-                    <span
-                      className="rounded-full px-1.5 py-0.5 text-[9px]"
-                      style={{
-                        background: s.mutagen === '화기' ? 'rgba(217,138,122,0.14)' : 'var(--accent-soft)',
-                        color: s.mutagen === '화기' ? warn : 'var(--accent-deep)',
-                      }}
-                    >
-                      {MUTAGEN_MEANING[s.mutagen]?.label ?? s.mutagen}
+                    <span className="inline-flex flex-wrap items-center gap-1.5">
+                      <span
+                        className="rounded-full px-1.5 py-0.5 text-[9px]"
+                        style={{
+                          background: s.mutagen === '화기' ? 'rgba(217,138,122,0.14)' : 'var(--accent-soft)',
+                          color: s.mutagen === '화기' ? warn : 'var(--accent-deep)',
+                        }}
+                      >
+                        {MUTAGEN_MEANING[s.mutagen]?.label ?? s.mutagen}
+                      </span>
+                      <span className="text-[10.5px] leading-[1.5] t-muted">{MUTAGEN_HINT[s.mutagen]}</span>
                     </span>
                   )}
                 </div>
@@ -117,6 +120,7 @@ export default function PalaceDetail({ palace, onUnlock }: Props) {
                 <span
                   key={`${s.cn}-${i}`}
                   className="t-chip !text-[10.5px]"
+                  title={s.mutagen ? MUTAGEN_HINT[s.mutagen] : undefined}
                   style={s.mutagen === '화기' ? { color: warn, borderColor: 'rgba(217,138,122,0.35)' } : undefined}
                 >
                   {s.name}

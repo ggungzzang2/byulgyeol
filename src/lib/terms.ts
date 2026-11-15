@@ -331,6 +331,17 @@ export const MUTAGEN_MEANING: Record<string, { label: string; text: string; tone
   },
 };
 
+/*
+ * 사화 한 줄 풀이 — 처음 보는 사람도 칩만 보고 바로 이해할 수 있는 짧은 해설.
+ * (MUTAGEN_MEANING 은 리포트용 긴 해설, 이쪽은 칩 옆에 붙는 한 줄입니다.)
+ */
+export const MUTAGEN_HINT: Record<string, string> = {
+  화록: '복과 재물의 흐름을 열어주는 기운',
+  화권: '주도권과 추진력을 쥐어주는 기운',
+  화과: '명예·인정·안정을 불러오는 기운',
+  화기: '신경 써서 다스려야 할 포인트',
+};
+
 /* ------------------------------ 오행국·간지 ------------------------------ */
 
 export const FIVE_ELEMENTS_KR: Record<string, string> = {

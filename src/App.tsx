@@ -11,6 +11,7 @@ import ChartView from './components/ChartView';
 import CheckoutModal from './components/CheckoutModal';
 import PremiumReport from './components/PremiumReport';
 import CompatReport from './components/CompatReport';
+import CompatPreview from './components/CompatPreview';
 import WesternView from './components/WesternView';
 import WesternReport from './components/WesternReport';
 import ThemeToggle from './components/ThemeToggle';
@@ -26,6 +27,10 @@ export default function App() {
   const [partner, setPartner] = useState<ChartModel | null>(null);
   const [checkout, setCheckout] = useState<Product | null>(null);
   const [pendingProduct, setPendingProduct] = useState<ProductId | null>(null);
+  /** 궁합 무료 프리뷰(점수 먼저) — 결제 전 단계 */
+  const [compatPreview, setCompatPreview] = useState(false);
+  /** 프리뷰에서 입력한 상대방 정보 — 결제 모달에 그대로 넘겨 재입력을 없앱니다. */
+  const [partnerDraft, setPartnerDraft] = useState<BirthInput | null>(null);
   const [ziweiTier, setZiweiTier] = useState<'none' | 'basic' | 'premium'>('none');
   const [westernPaid, setWesternPaid] = useState(false);
   const [hasBundle, setHasBundle] = useState(false);
@@ -82,9 +87,11 @@ export default function App() {
       setWestern(west);
       setView(system === 'western' ? 'western' : 'chart');
       if (pendingProduct) {
-        const product = findProduct(pendingProduct);
+        const id = pendingProduct;
         setPendingProduct(null);
-        window.setTimeout(() => setCheckout(product), 500);
+        // 궁합은 결제 전에 무료 점수부터 보여 줍니다.
+        if (id === 'compat') window.setTimeout(() => setCompatPreview(true), 400);
+        else window.setTimeout(() => setCheckout(findProduct(id)), 500);
       }
     } catch (err) {
       flash(err instanceof Error ? err.message : '명반을 계산하지 못했어요. 입력값을 확인해 주세요.');
@@ -93,6 +100,24 @@ export default function App() {
 
   const handleProductFromLanding = (id: ProductId) => {
     const product = findProduct(id);
+    // 궁합 상품은 결과가 있으면 무료 점수 → 유료 심층 동선으로 안내합니다.
+    if (id === 'compat' && chart) {
+      setCompatPreview(true);
+      return;
+    }
+    if (id === 'compat' && !chart) {
+      setPendingProduct('compat');
+      document.getElementById(system === 'western' ? 'western-chart' : 'chart')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+      flash(
+        theme === 'character'
+          ? '먼저 네 별지도를 그리면 궁합 점수를 바로 볼 수 있어!'
+          : '먼저 명반을 열면 궁합 점수를 무료로 볼 수 있습니다.',
+      );
+      return;
+    }
     // 서양 점성술 상품은 동양 결과가 없어도 결제 동선이 열립니다.
     const needsChart = product.system !== 'western' || !western;
     if (!needsChart && western) {
@@ -118,6 +143,12 @@ export default function App() {
 
   const handleUnlock = (id: ProductId) => {
     setFocusAi(false);
+    // 궁합은 결제창보다 무료 점수 프리뷰를 먼저 엽니다.
+    if (id === 'compat') {
+      setCheckout(null);
+      setCompatPreview(true);
+      return;
+    }
     if (id === 'western' && westernPaid) {
       setView('westernReport');
       return;
@@ -204,6 +235,10 @@ export default function App() {
             }}
             onUnlock={handleUnlock}
             onAiReport={handleAiReport}
+            onCompatPreview={() => {
+              setCheckout(null);
+              setCompatPreview(true);
+            }}
           />
         )}
 
@@ -255,10 +290,23 @@ export default function App() {
           />
         )}
 
+        {compatPreview && chart && (
+          <CompatPreview
+            chart={chart}
+            onClose={() => setCompatPreview(false)}
+            onUpgrade={(input) => {
+              setPartnerDraft(input);
+              setCompatPreview(false);
+              setCheckout(findProduct('compat'));
+            }}
+          />
+        )}
+
         {checkout && chart && (
           <CheckoutModal
             product={checkout}
             chartName={chart.name}
+            initialPartner={checkout.id === 'compat' ? partnerDraft : null}
             onClose={() => setCheckout(null)}
             onPaid={handlePaid}
             onSelect={(id) => setCheckout(findProduct(id))}

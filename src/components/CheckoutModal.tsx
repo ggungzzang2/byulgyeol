@@ -11,12 +11,15 @@ import {
   productTagline,
 } from '../lib/products';
 import type { ProductSystem } from '../lib/systems';
+import { TIME_OPTIONS } from '../lib/terms';
 import { useTheme } from '../lib/theme';
 import { LockIcon } from './ui';
 
 type Props = {
   product: Product;
   chartName: string;
+  /** 궁합 무료 프리뷰에서 넘어온 상대방 정보 — 있으면 미리 채워 둡니다. */
+  initialPartner?: BirthInput | null;
   onClose: () => void;
   onPaid: (partner?: BirthInput) => void;
   /** 결제 모달 안에서 다른 체계·다른 상품으로 갈아탈 때 */
@@ -31,19 +34,21 @@ const LANES: Array<{ key: ProductSystem; label: string; sub: string; glyph: stri
   { key: 'both', label: '통합 (둘 다)', sub: '두 리포트 함께', glyph: '✦' },
 ];
 
-export default function CheckoutModal({ product, chartName, onClose, onPaid, onSelect }: Props) {
+export default function CheckoutModal({ product, chartName, initialPartner, onClose, onPaid, onSelect }: Props) {
   const { theme, copy } = useTheme();
   const isCharacter = theme === 'character';
   const [agree, setAgree] = useState(false);
   const [stage, setStage] = useState<'form' | 'processing' | 'done'>('form');
   const [method, setMethod] = useState<'card' | 'kakao' | 'naver'>('card');
 
-  const [pName, setPName] = useState('');
-  const [pYear, setPYear] = useState('');
-  const [pMonth, setPMonth] = useState('');
-  const [pDay, setPDay] = useState('');
-  const [pTime, setPTime] = useState('6');
-  const [pGender, setPGender] = useState<Gender>('male');
+  const [pName, setPName] = useState(initialPartner?.name ?? '');
+  const [pYear, setPYear] = useState(initialPartner ? String(initialPartner.year) : '');
+  const [pMonth, setPMonth] = useState(initialPartner ? String(initialPartner.month) : '');
+  const [pDay, setPDay] = useState(initialPartner ? String(initialPartner.day) : '');
+  const [pTime, setPTime] = useState(
+    initialPartner ? (initialPartner.timeKnown ? String(initialPartner.timeIndex) : 'unknown') : 'unknown',
+  );
+  const [pGender, setPGender] = useState<Gender>(initialPartner?.gender ?? 'male');
   const [error, setError] = useState<string | null>(null);
 
   const lane = product.system;
@@ -95,8 +100,8 @@ export default function CheckoutModal({ product, chartName, onClose, onPaid, onS
                 day: Number(pDay),
                 calendar: 'solar',
                 isLeap: false,
-                timeIndex: Number(pTime),
-                timeKnown: true,
+                timeIndex: pTime === 'unknown' ? 6 : Number(pTime),
+                timeKnown: pTime !== 'unknown',
                 gender: pGender,
               }
             : undefined,
@@ -303,13 +308,12 @@ export default function CheckoutModal({ product, chartName, onClose, onPaid, onS
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <select className="t-field !text-[13px]" value={pTime} onChange={(e) => setPTime(e.target.value)}>
-                  <option value="6">시간 모름 (정오)</option>
-                  <option value="0">자시 00–01</option>
-                  <option value="2">인시 03–05</option>
-                  <option value="4">진시 07–09</option>
-                  <option value="6">오시 11–13</option>
-                  <option value="8">신시 15–17</option>
-                  <option value="10">술시 19–21</option>
+                  <option value="unknown">시간 모름 (정오)</option>
+                  {TIME_OPTIONS.map((t) => (
+                    <option key={t.index} value={t.index}>
+                      {t.label} {t.range}
+                    </option>
+                  ))}
                 </select>
                 <select className="t-field !text-[13px]" value={pGender} onChange={(e) => setPGender(e.target.value as Gender)}>
                   <option value="male">남성</option>

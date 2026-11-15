@@ -153,7 +153,7 @@ export default function ChartBoard({ chart, selected, onSelect }: Props) {
 
       {/* 범례 */}
       <div
-        className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3 py-2 text-[9px] sm:gap-x-4 sm:px-4 sm:py-2.5 sm:text-[10px]"
+        className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3 py-2.5 text-[10px] sm:gap-x-4 sm:px-4 sm:py-2.5 sm:text-[10.5px]"
         style={{ borderTop: '1px solid var(--line)', background: 'var(--field-bg)' }}
       >
         {[
@@ -174,7 +174,9 @@ export default function ChartBoard({ chart, selected, onSelect }: Props) {
           </span>
           화기
         </span>
-        <span className="ml-auto hidden t-faint sm:inline">{copy.chart.boardNote}</span>
+        <span className="mt-1 w-full text-[11px] leading-[1.6] t-muted sm:ml-auto sm:mt-0 sm:w-auto sm:text-[10.5px]">
+          {copy.chart.boardNote}
+        </span>
       </div>
     </div>
   );
