@@ -279,7 +279,9 @@ export default function CompatPreview({ chart, onUpgrade, onClose }: Props) {
                     무료 결과 · 두 사람의 케미
                   </p>
                   <h4 className="t-title mt-1.5 text-[18px] leading-snug">
-                    {chart.primaryStar} {isCharacter ? '별' : '성'} × {partner.primaryStar} {isCharacter ? '별' : '성'}
+                    {chart.primaryStar}
+                    {isCharacter ? '별' : '성'} × {partner.primaryStar}
+                    {isCharacter ? '별' : '성'}
                   </h4>
                   <p className="mt-2 text-[12.5px] leading-[1.8] t-body">{oneLine}</p>
                 </div>

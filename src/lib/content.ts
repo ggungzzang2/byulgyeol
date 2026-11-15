@@ -601,6 +601,14 @@ const COMPAT_TABLE: Record<string, string> = {
   무곡무곡: '둘 다 말보다 결과로 증명합니다. 감정 표현이 없어 오해가 쌓이기 쉽습니다.',
 };
 
+/** 받침 유무에 맞는 조사를 고릅니다. (예: '사람'→과/이, '별'→와/가) */
+function josa(word: string, withBatchim: string, withoutBatchim: string): string {
+  const last = word.trim().slice(-1);
+  const code = last.charCodeAt(0);
+  if (code >= 0xac00 && code <= 0xd7a3) return (code - 0xac00) % 28 === 0 ? withoutBatchim : withBatchim;
+  return withoutBatchim;
+}
+
 export function compatibility(primaryA: string, primaryB: string): { score: number; headline: string; body: string } {
   if (primaryA === primaryB) {
     return {
@@ -617,7 +625,7 @@ export function compatibility(primaryA: string, primaryB: string): { score: numb
   return {
     score,
     headline: `${primaryA} · ${primaryB}의 조합`,
-    body: `${pa.identity}와 ${pb.identity}가 만나는 조합입니다. 한쪽은 ${pa.style}, 다른 쪽은 ${pb.style}을 무기로 삼아 서로의 빈 곳을 채웁니다. 다만 두 사람의 약점이 같은 날 겹치면, 같은 말이 두 배로 아프게 들립니다.`,
+    body: `${pa.identity}${josa(pa.identity, '과', '와')} ${pb.identity}${josa(pb.identity, '이', '가')} 만나는 조합입니다. 한쪽은 ${pa.style}, 다른 쪽은 ${pb.style}${josa(pb.style, '을', '를')} 무기로 삼아 서로의 빈 곳을 채웁니다. 다만 두 사람의 약점이 같은 날 겹치면, 같은 말이 두 배로 아프게 들립니다.`,
   };
 }
 

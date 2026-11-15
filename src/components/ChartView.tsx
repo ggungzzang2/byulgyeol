@@ -595,7 +595,7 @@ export default function ChartView({ chart, system, onSystemChange, onReset, onUn
             className="t-panel p-6 transition-shadow duration-700 sm:p-9"
             style={
               teaserPulse
-                ? { boxShadow: '0 0 0 3px var(--accent-soft), 0 0 55px -6px var(--accent)' }
+                ? { boxShadow: '0 0 0 4px var(--accent-soft), 0 0 0 2px var(--accent), 0 0 64px -6px var(--accent)' }
                 : undefined
             }
           >
