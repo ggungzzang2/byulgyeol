@@ -308,7 +308,7 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <select className="t-field !text-[13px]" value={pTime} onChange={(e) => setPTime(e.target.value)}>
-                  <option value="unknown">시간 모름 (정오)</option>
+                  <option value="unknown">시간 모름</option>
                   {TIME_OPTIONS.map((t) => (
                     <option key={t.index} value={t.index}>
                       {t.label} {t.range}

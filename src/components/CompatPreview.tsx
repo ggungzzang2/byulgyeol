@@ -204,7 +204,7 @@ export default function CompatPreview({ chart, onUpgrade, onClose }: Props) {
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
                 >
-                  <option value="unknown">{isCharacter ? '시간 모름 (정오 기준)' : '시간 모름'}</option>
+                  <option value="unknown">{isCharacter ? '시간 모름' : '시간 모름'}</option>
                   {TIME_OPTIONS.map((t) => (
                     <option key={t.index} value={t.index}>
                       {t.label} {t.range}
