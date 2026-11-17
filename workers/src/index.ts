@@ -135,11 +135,11 @@ function corsHeaders(request: Request, env: Env): Record<string, string> {
   };
   if (origin && allowed.includes(origin.replace(/\/+$/, ''))) {
     headers['Access-Control-Allow-Origin'] = origin;
-  } else if (allowed.length === 1) {
+  } else if (!origin && allowed.length === 1) {
+    // 서버 간 호출(페이앱 통보 등)에는 Origin 이 없습니다.
     headers['Access-Control-Allow-Origin'] = allowed[0];
-  } else {
-    headers['Access-Control-Allow-Origin'] = 'null';
   }
+  // 허용 목록에 없는 오리진에는 헤더를 주지 않습니다(브라우저가 차단).
   return headers;
 }
 
