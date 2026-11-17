@@ -107,7 +107,7 @@ export default function SynastryReport({ model, partner, onBack, onAgain }: Prop
                   ))}
                 </div>
                 <p className={`num mt-3 text-[10px] ${primary ? 't-panel-faint' : 't-faint'}`}>
-                  {m.solarText} · {m.timeText.split(' ')[0]}
+                  {m.solarText} · {m.timeKnown ? m.timeText.split(' ')[0] : '시간 모름'}
                 </p>
               </div>
             </div>
