@@ -14,9 +14,10 @@ import CompatReport from './components/CompatReport';
 import CompatPreview from './components/CompatPreview';
 import WesternView from './components/WesternView';
 import WesternReport from './components/WesternReport';
+import NewYearReport from './components/NewYearReport';
 import ThemeToggle from './components/ThemeToggle';
 
-type View = 'landing' | 'chart' | 'report' | 'compat' | 'western' | 'westernReport';
+type View = 'landing' | 'chart' | 'report' | 'compat' | 'western' | 'westernReport' | 'newyear2027';
 
 export default function App() {
   const [theme, setThemeState] = useState<ThemeId>(() => readThemeFromUrl());
@@ -34,6 +35,10 @@ export default function App() {
   const [ziweiTier, setZiweiTier] = useState<'none' | 'basic' | 'premium'>('none');
   const [westernPaid, setWesternPaid] = useState(false);
   const [hasBundle, setHasBundle] = useState(false);
+  /** 2027 정미년 신년 정밀 리포트 열람 여부 (프로토타입 결제) */
+  const [newYearUnlocked, setNewYearUnlocked] = useState(false);
+  /** 랜딩의 2027 부적 버튼으로 들어왔을 때 결과 화면에서 부적 섹션으로 이동 */
+  const [focusNewYear, setFocusNewYear] = useState(false);
   const [focusAi, setFocusAi] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -143,6 +148,16 @@ export default function App() {
 
   const handleUnlock = (id: ProductId) => {
     setFocusAi(false);
+    // 2027 신년 리포트는 전용 화면으로 이어집니다 (프로토타입 결제 후 바로 열림).
+    if (id === 'newyear2027') {
+      if (newYearUnlocked) {
+        setCheckout(null);
+        setView('newyear2027');
+        return;
+      }
+      setCheckout(findProduct('newyear2027'));
+      return;
+    }
     // 궁합은 결제창보다 무료 점수 프리뷰를 먼저 엽니다.
     if (id === 'compat') {
       setCheckout(null);
@@ -194,6 +209,12 @@ export default function App() {
       return;
     }
 
+    if (id === 'newyear2027') {
+      setNewYearUnlocked(true);
+      setView('newyear2027');
+      return;
+    }
+
     if (id === 'bundle') {
       setHasBundle(true);
       setWesternPaid(true);
@@ -206,6 +227,21 @@ export default function App() {
     setView('report');
   };
 
+  /** 랜딩의 2027 신년 부적 배너 — 명반이 없으면 먼저 입력으로 안내합니다. */
+  const handleNewYearFromLanding = () => {
+    setFocusNewYear(true);
+    if (chart) {
+      setView('chart');
+      return;
+    }
+    document.getElementById('chart')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    flash(
+      theme === 'character'
+        ? '먼저 생년월일을 알려주면 2027 부적을 바로 그려줄게!'
+        : '먼저 생년월일시를 입력하시면 2027 부적을 그려드립니다.',
+    );
+  };
+
   return (
     <ThemeProvider theme={theme} setTheme={setTheme}>
       <div className={`theme theme-${theme}`}>
@@ -214,6 +250,7 @@ export default function App() {
             onSubmit={openChart}
             onSample={() => openChart(SAMPLE_INPUT)}
             onProduct={handleProductFromLanding}
+            onNewYear={handleNewYearFromLanding}
             system={system}
             onSystemChange={setSystem}
           />
@@ -224,6 +261,9 @@ export default function App() {
             chart={chart}
             system={system}
             onSystemChange={setSystem}
+            newYearUnlocked={newYearUnlocked}
+            focusNewYear={focusNewYear}
+            onFocusNewYearHandled={() => setFocusNewYear(false)}
             onReset={() => {
               setChart(null);
               setWestern(null);
@@ -231,6 +271,7 @@ export default function App() {
               setZiweiTier('none');
               setWesternPaid(false);
               setHasBundle(false);
+              setNewYearUnlocked(false);
               setView('landing');
             }}
             onUnlock={handleUnlock}
@@ -240,6 +281,10 @@ export default function App() {
               setCompatPreview(true);
             }}
           />
+        )}
+
+        {view === 'newyear2027' && chart && (
+          <NewYearReport chart={chart} onBack={() => setView('chart')} />
         )}
 
         {view === 'western' && western && (

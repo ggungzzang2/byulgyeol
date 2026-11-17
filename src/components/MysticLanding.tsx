@@ -5,12 +5,15 @@ import { THEME_ART, useTheme } from '../lib/theme';
 import BirthForm from './BirthForm';
 import SystemTabs from './SystemTabs';
 import WesternLanding from './WesternLanding';
+import NewYearBanner from './NewYearBanner';
 import { SectionLabel, StarMark } from './ui';
 
 type Props = {
   onSubmit: (input: BirthInput) => void;
   onSample: () => void;
   onProduct: (id: ProductId) => void;
+  /** 랜딩의 2027 신년 부적 배너 */
+  onNewYear: () => void;
   system: SystemId;
   onSystemChange: (system: SystemId) => void;
 };
@@ -179,7 +182,7 @@ function Hero() {
   );
 }
 
-export default function MysticLanding({ onSubmit, onSample, onProduct, system, onSystemChange }: Props) {
+export default function MysticLanding({ onSubmit, onSample, onProduct, onNewYear, system, onSystemChange }: Props) {
   const { copy } = useTheme();
 
   return (
@@ -192,6 +195,11 @@ export default function MysticLanding({ onSubmit, onSample, onProduct, system, o
       ) : (
         <>
       <Hero />
+
+      {/* 2027 정미년 신년 부적 — 무료 퍼널 입구 */}
+      <section className="mx-auto mt-14 max-w-6xl px-5 sm:px-8">
+        <NewYearBanner onStart={onNewYear} />
+      </section>
 
       {/* 입력 */}
       <section id="chart" className="relative mx-auto max-w-6xl scroll-mt-20 px-5 sm:px-8">

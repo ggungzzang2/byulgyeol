@@ -9,6 +9,8 @@ type Props = {
   onSubmit: (input: BirthInput) => void;
   onSample: () => void;
   onProduct: (id: ProductId) => void;
+  /** 랜딩의 2027 신년 부적 배너 */
+  onNewYear: () => void;
   system: SystemId;
   onSystemChange: (system: SystemId) => void;
 };

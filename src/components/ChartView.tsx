@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ChartModel, PalaceView } from '../lib/chart';
 import { buildTeaser, deepProfileOf, palaceScore, profileOf } from '../lib/content';
 import { CHARACTER_FIRST_PRICE, PRODUCTS, WESTERN_PRODUCTS, ZIWEI_PRODUCTS, findProduct, productBadge, productPoints, productPrice, productScopeShort, productShortCta, productTagline, type ProductId } from '../lib/products';
@@ -12,6 +12,7 @@ import StarEmblem from './StarEmblem';
 import ChartBoard from './ChartBoard';
 import PalaceDetail from './PalaceDetail';
 import SystemTabs from './SystemTabs';
+import NewYear2027 from './NewYear2027';
 import { ArrowIcon, LockIcon, SectionLabel, StarMark } from './ui';
 
 type Props = {
@@ -23,9 +24,25 @@ type Props = {
   onAiReport: () => void;
   /** 궁합 무료 점수 프리뷰 열기 */
   onCompatPreview: () => void;
+  /** 2027 신년 정밀 리포트를 이미 연 상태 */
+  newYearUnlocked: boolean;
+  /** 랜딩의 2027 부적 버튼으로 들어온 경우 부적 섹션으로 이동 */
+  focusNewYear?: boolean;
+  onFocusNewYearHandled?: () => void;
 };
 
-export default function ChartView({ chart, system, onSystemChange, onReset, onUnlock, onAiReport, onCompatPreview }: Props) {
+export default function ChartView({
+  chart,
+  system,
+  onSystemChange,
+  onReset,
+  onUnlock,
+  onAiReport,
+  onCompatPreview,
+  newYearUnlocked,
+  focusNewYear = false,
+  onFocusNewYearHandled,
+}: Props) {
   const { theme, copy } = useTheme();
   const isCharacter = theme === 'character';
   const [selected, setSelected] = useState<PalaceView>(chart.soulPalace);
@@ -47,6 +64,20 @@ export default function ChartView({ chart, system, onSystemChange, onReset, onUn
   const flash = (msg: string) => {
     setToast(msg);
     window.setTimeout(() => setToast(null), 2800);
+  };
+
+  /** 랜딩·부적 버튼에서 넘어온 경우 2027 부적 섹션으로 이동 */
+  useEffect(() => {
+    if (!focusNewYear) return;
+    const timer = window.setTimeout(() => {
+      document.getElementById('newyear2027')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      onFocusNewYearHandled?.();
+    }, 380);
+    return () => window.clearTimeout(timer);
+  }, [focusNewYear, onFocusNewYearHandled]);
+
+  const jumpToNewYear = () => {
+    document.getElementById('newyear2027')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   /** '살짝 엿보기' → 미리보기 섹션으로 부드럽게 이동 + 잠깐 하이라이트 */
@@ -317,6 +348,12 @@ export default function ChartView({ chart, system, onSystemChange, onReset, onUn
                       <path d="M8.7 10.9l6.6-3.6M8.7 13.1l6.6 3.6" />
                     </svg>
                     {copy.chart.share}
+                  </button>
+                  <button onClick={jumpToNewYear} className="t-btn t-btn-soft !px-4 !py-2.5 text-[11.5px]">
+                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7">
+                      <path d="M12 3.5l2.2 5.6 6 .4-4.6 3.9 1.4 5.9L12 16.2 6.9 19.3l1.4-5.9L3.8 9.5l6-.4L12 3.5z" />
+                    </svg>
+                    2027 신년 부적
                   </button>
                 </div>
               </div>
@@ -650,6 +687,9 @@ export default function ChartView({ chart, system, onSystemChange, onReset, onUn
             </div>
           </div>
         </section>
+
+        {/* 2027 정미년 신년 부적 → 정밀 리포트 → 수호 원석 굿즈 */}
+        <NewYear2027 chart={chart} unlocked={newYearUnlocked} onUnlock={() => onUnlock('newyear2027')} />
 
         {/* 궁합 — 무료 점수 먼저, 심층 해석은 유료 */}
         <section className="mt-12">

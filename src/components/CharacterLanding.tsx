@@ -18,12 +18,15 @@ import { THEME_ART, useTheme } from '../lib/theme';
 import BirthForm from './BirthForm';
 import SystemTabs from './SystemTabs';
 import WesternLanding from './WesternLanding';
+import NewYearBanner from './NewYearBanner';
 import { SectionLabel, StarMark } from './ui';
 
 type Props = {
   onSubmit: (input: BirthInput) => void;
   onSample: () => void;
   onProduct: (id: ProductId) => void;
+  /** 랜딩의 2027 신년 부적 배너 */
+  onNewYear: () => void;
   system: SystemId;
   onSystemChange: (system: SystemId) => void;
 };
@@ -111,7 +114,7 @@ function LuckRing({ score }: { score: number }) {
   );
 }
 
-export default function CharacterLanding({ onSubmit, onSample, onProduct, system, onSystemChange }: Props) {
+export default function CharacterLanding({ onSubmit, onSample, onProduct, onNewYear, system, onSystemChange }: Props) {
   const { copy } = useTheme();
 
   return (
@@ -326,6 +329,11 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct, system
             <span aria-hidden="true">→</span>
           </a>
         </div>
+      </section>
+
+      {/* 2027 정미년 신년 부적 — 무료 퍼널 입구 */}
+      <section className="mx-auto mt-12 max-w-5xl px-5 sm:px-8">
+        <NewYearBanner onStart={onNewYear} />
       </section>
 
       {/* REPORTS */}

@@ -1,7 +1,7 @@
 import type { ThemeId } from './theme';
 import type { ProductSystem } from './systems';
 
-export type ProductId = 'basic' | 'premium' | 'compat' | 'western' | 'bundle';
+export type ProductId = 'basic' | 'premium' | 'compat' | 'western' | 'bundle' | 'newyear2027';
 
 export type Product = {
   id: ProductId;
@@ -72,6 +72,23 @@ export const PRODUCTS: Product[] = [
     ],
   },
   {
+    id: 'newyear2027',
+    system: 'ziwei',
+    name: '2027 정미년 신년 정밀 운세',
+    hanja: '丁未年 年運',
+    price: 9900,
+    originalPrice: 12900,
+    tagline: '2027 열두 달 흐름 · 사화 넷 · 보완 기운과 수호 원석 처방',
+    points: [
+      '2027 유년 명궁과 사화 네 개의 자리',
+      '열두 달마다 무엇을 먼저 할지',
+      '2027년 연예·금전·일 3지수',
+      '부족한 기운과 보완 습관 세 가지',
+      '수호 원석 굿즈 추천과 예약(프로토타입)',
+    ],
+    badge: '2027 신년',
+  },
+  {
     id: 'bundle',
     system: 'both',
     name: '동양 × 서양 통합 리포트',
@@ -90,7 +107,10 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
-export const ZIWEI_PRODUCTS = PRODUCTS.filter((p) => p.system === 'ziwei');
+/** 2027 신년 상품 — 신년 부적 섹션에서만 따로 진입합니다(랜딩 5상품 그리드에는 넣지 않음). */
+export const NEWYEAR_PRODUCT = PRODUCTS.find((p) => p.id === 'newyear2027')!;
+
+export const ZIWEI_PRODUCTS = PRODUCTS.filter((p) => p.system === 'ziwei' && p.id !== 'newyear2027');
 export const WESTERN_PRODUCTS = PRODUCTS.filter((p) => p.system === 'western' || p.system === 'both');
 
 /**
@@ -104,8 +124,11 @@ export const CHARACTER_COMPAT_PRICE = 6900;
 export const CHARACTER_WESTERN_PRICE = 3900;
 export const CHARACTER_BUNDLE_PRICE = 12900;
 
+export const CHARACTER_NEWYEAR_PRICE = 6900;
+
 export function productPrice(product: Product, theme: ThemeId): number {
   if (theme === 'character') {
+    if (product.id === 'newyear2027') return CHARACTER_NEWYEAR_PRICE;
     if (product.id === 'basic') return CHARACTER_FIRST_PRICE;
     if (product.id === 'compat') return CHARACTER_COMPAT_PRICE;
     if (product.id === 'western') return CHARACTER_WESTERN_PRICE;
@@ -115,6 +138,7 @@ export function productPrice(product: Product, theme: ThemeId): number {
 }
 
 export function productOriginalPrice(product: Product, theme: ThemeId): number | undefined {
+  if (theme === 'character' && product.id === 'newyear2027') return 9900;
   if (theme === 'character' && product.id === 'compat') return 9900;
   if (theme === 'character' && product.id === 'western') return 6900;
   if (theme === 'character' && product.id === 'bundle') return 16800;
@@ -122,6 +146,11 @@ export function productOriginalPrice(product: Product, theme: ThemeId): number |
 }
 
 export function productTagline(product: Product, theme: ThemeId): string {
+  if (product.id === 'newyear2027') {
+    return theme === 'character'
+      ? '2027 열두 달 흐름, 보완 기운, 수호 원석까지 한 번에'
+      : '2027년 열두 달의 흐름과 보완 기운, 수호 원석 처방';
+  }
   if (theme === 'character' && product.id === 'basic') return '명궁·연애·재물·진로·배우자상 핵심만, 커피 한 잔 값으로';
   if (theme === 'character' && product.id === 'western') return '네가 태어난 하늘의 좌표 — 태양·달·어센던트';
   if (theme === 'character' && product.id === 'bundle') return '동양 별지도 + 서양 천궁도, 한 번에';
@@ -129,6 +158,23 @@ export function productTagline(product: Product, theme: ThemeId): string {
 }
 
 export function productPoints(product: Product, theme: ThemeId): string[] {
+  if (product.id === 'newyear2027') {
+    return theme === 'character'
+      ? [
+          '2027년 네 명궁과 사화 네 개의 자리',
+          '열두 달마다 뭘 먼저 할지',
+          '2027년 연예·금전·일 3지수',
+          '부족한 기운과 보완 습관 세 가지',
+          '수호 원석 굿즈 추천과 장바구니(프로토타입)',
+        ]
+      : [
+          '2027 유년 명궁과 사화 네 개의 자리',
+          '열두 달마다 무엇을 먼저 할지',
+          '2027년 연예·금전·일 3지수',
+          '부족한 기운과 보완 습관 세 가지',
+          '수호 원석 굿즈 추천과 예약(프로토타입)',
+        ];
+  }
   if (theme === 'character' && product.id === 'basic') {
     return [
       '내 수호별과 성격의 결 (명궁)',
@@ -165,6 +211,9 @@ export function productPoints(product: Product, theme: ThemeId): string[] {
  */
 export function productScopeShort(product: Product, theme: ThemeId): string | null {
   const premiumPrice = productPrice(findProduct('premium'), theme).toLocaleString('ko-KR');
+  if (product.id === 'newyear2027') {
+    return '2027년 한 해 한정 · 12궁 전체 해설은 포함되지 않음';
+  }
   if (product.id === 'basic') {
     return `핀셋 리포트 · 12궁 전체·월별 가이드 미포함 (프리미엄 ${premiumPrice}원)`;
   }
@@ -186,6 +235,11 @@ export function productScopeShort(product: Product, theme: ThemeId): string | nu
 /** 결제창에 쓰는 포함 범위 설명 (테마별 말투) */
 export function productScopeNote(product: Product, theme: ThemeId): string | null {
   const premiumPrice = productPrice(findProduct('premium'), theme).toLocaleString('ko-KR');
+  if (product.id === 'newyear2027') {
+    return theme === 'character'
+      ? '2027년 한 해만 짚는 신년 리포트야. 유년 명궁과 사화 네 개, 열두 달 처방, 보완 원석까지 들어 있어. 명궁·12개 별방 전체 해설은 담기지 않아.'
+      : '2027년 한 해만 짚는 신년 리포트입니다. 유년 명궁과 사화 네 개, 열두 달 처방, 보완 원석까지 포함합니다. 명궁·12궁 전체 해설은 포함되지 않습니다.';
+  }
   if (product.id === 'basic') {
     return theme === 'character'
       ? `명궁·재물·연애·진로·배우자상·돈 새는 장면까지만 핵심으로 짚은 핀셋 리포트야. 12개 별방 전체 해설과 달마다 처방은 '전체 별 이야기'(${premiumPrice}원)에 들어 있어.`
@@ -210,6 +264,7 @@ export function productScopeNote(product: Product, theme: ThemeId): string | nul
 }
 
 export function productBadge(product: Product, theme: ThemeId): string | undefined {
+  if (product.id === 'newyear2027') return '✦ 2027 신년';
   if (theme === 'character' && product.id === 'basic') return '☕ 커피 한 잔 값';
   if (theme === 'character' && product.id === 'western') return '✶ 서양 점성술';
   if (theme === 'character' && product.id === 'bundle') return '✦ 통합';
@@ -217,6 +272,7 @@ export function productBadge(product: Product, theme: ThemeId): string | undefin
 }
 
 export function productCta(product: Product, theme: ThemeId): string {
+  if (product.id === 'newyear2027') return '2027 리포트 열기';
   if (theme === 'character') {
     if (product.id === 'basic') return '3,900원으로 내 별 읽기';
     if (product.id === 'premium') return '12개 별방 전부 보기';
@@ -231,6 +287,7 @@ export function productCta(product: Product, theme: ThemeId): string {
 }
 
 export function productShortCta(product: Product, theme: ThemeId): string {
+  if (product.id === 'newyear2027') return '2027 열기';
   if (theme === 'character') {
     if (product.id === 'basic') return '3,900원으로 열기';
     if (product.id === 'premium') return '전체 보기';
