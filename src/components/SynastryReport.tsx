@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { WesternModel } from '../lib/western';
-import { synastryOf } from '../lib/synastry';
+import { synastryOf, withJosa } from '../lib/synastry';
 import { useTheme } from '../lib/theme';
 import { ScoreBar, SectionLabel } from './ui';
 
@@ -192,8 +192,8 @@ export default function SynastryReport({ model, partner, onBack, onAgain }: Prop
           <SectionLabel index="02">교차 각</SectionLabel>
           <h2 className="t-display mt-3 text-[21px]">행성끼리 만나는 자리</h2>
           <p className="mt-2 text-[11.5px] leading-[1.85] t-muted">
-            두 천궁도에서 찾은 주요 각 {syn.aspects.length}개 중 영향이 큰 {topAspects.length}개입니다. 합·삼분·육분은
-            밀어 주는 각, 사분·대립은 부딪히는 각입니다.
+            두 천궁도에서 찾은 주요 각 {syn.aspects.length}개를 영향이 큰 순서로 {topAspects.length}개 담았습니다.
+            합·삼분·육분은 밀어 주는 각, 사분·대립은 부딪히는 각입니다.
           </p>
           <div className="mt-4 overflow-hidden rounded-2xl" style={{ border: '1px solid var(--line)' }}>
             {topAspects.map((asp, i) => (
@@ -204,7 +204,7 @@ export default function SynastryReport({ model, partner, onBack, onAgain }: Prop
               >
                 <div className="flex items-baseline justify-between gap-2">
                   <p className="text-[11.5px] font-semibold t-body">
-                    {asp.a.name} · {asp.b.name}
+                    내 {asp.a.name} · 상대 {asp.b.name}
                     <span className="ml-1.5 text-[10px] t-muted">
                       {asp.type} {asp.angle}°
                     </span>
@@ -283,8 +283,8 @@ export default function SynastryReport({ model, partner, onBack, onAgain }: Prop
               <p className="text-[9.5px] tracking-[0.22em] t-panel-accent">BOTTOM LINE</p>
               <p className="t-panel-title mt-4 text-[17px] leading-[1.8] sm:text-[19px]">
                 {syn.band.line}
-                <br className="hidden sm:block" /> {syn.nameA}와 {syn.nameB}의 지수 {syn.score}는 변하지 않는 값이 아니라,
-                지금 두 사람이 어디에 힘을 쓰면 좋은지를 알려주는 좌표입니다.
+                <br className="hidden sm:block" /> {withJosa(syn.nameA, '과와')} {syn.nameB}의 지수 {syn.score}는 변하지
+                않는 값이 아니라, 지금 두 사람이 어디에 힘을 쓰면 좋은지를 알려주는 좌표입니다.
               </p>
               <div className="mt-6 flex flex-wrap gap-2.5 no-print">
                 <button

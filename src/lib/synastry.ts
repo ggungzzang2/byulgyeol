@@ -173,18 +173,28 @@ const PAIR_BIAS: Record<string, number> = {
 
 /* ------------------------- 각 해설 (행성 쌍) ------------------------- */
 
-type Body = { title: string; flow: string; tense: string };
+type Body = { title: string; flow: string; tense: string; tenseTitle?: string };
+
+/** 각의 제목 — 마찰 각은 그 각에 맞는 제목을 따로 씁니다. */
+export function titleOf(asp: SynastryAspect): string {
+  if (asp.tone === 'tense') {
+    return PAIR_TEXT[asp.pair]?.tenseTitle ?? PAIR_TEXT[asp.pair]?.title ?? asp.title;
+  }
+  return asp.title;
+}
 
 const PAIR_TEXT: Record<string, Body> = {
   'sun-sun': {
     title: '중심이 만나는 각',
     flow: '두 사람이 되려는 모습이 같은 방향을 봅니다. 함께 있을 때 서로의 자리를 빼앗지 않고 각자의 빛을 인정합니다.',
     tense: '두 사람의 중심이 같은 자리를 두고 겨룹니다. 원하는 것은 비슷한데 방식이 달라, 결정 앞에서 주도권 다툼이 생깁니다.',
+    tenseTitle: '중심을 두고 겨루는 각',
   },
   'moon-sun': {
     title: '서로를 채우는 각',
     flow: '한 사람의 의지가 다른 사람의 마음을 편하게 합니다. 말하지 않아도 "이 사람은 나를 지지한다"는 감각이 먼저 옵니다.',
     tense: '마음과 중심이 어긋나 애정은 있는데 이해가 늦습니다. 상대의 결론이 내 감정보다 먼저 나오면 서운해집니다.',
+    tenseTitle: '마음과 중심이 어긋나는 각',
   },
   'mercury-sun': {
     title: '의지와 말',
@@ -230,6 +240,7 @@ const PAIR_TEXT: Record<string, Body> = {
     title: '마음이 편해지는 자리',
     flow: '함께 있으면 마음이 넓어집니다. 사소한 일에 덜 상하고 웃을 일이 많아집니다.',
     tense: '편안함이 늘어지기 쉽습니다. 서로 봐주다 보면 해야 할 말을 미루게 됩니다.',
+    tenseTitle: '편안함이 늘어지는 자리',
   },
   'moon-saturn': {
     title: '감정에 지는 무게',
@@ -260,6 +271,7 @@ const PAIR_TEXT: Record<string, Body> = {
     title: '대화의 넓이',
     flow: '이야기가 잘 확장됩니다. 함께 계획을 세우면 실제로 커집니다.',
     tense: '말이 앞서 약속이 커집니다. 벌여 놓고 지키지 못하는 일이 생깁니다.',
+    tenseTitle: '말이 약속을 앞서는 자리',
   },
   'mercury-saturn': {
     title: '말의 무게',
@@ -285,6 +297,7 @@ const PAIR_TEXT: Record<string, Body> = {
     title: '함께 넉넉해지는 자리',
     flow: '함께 있으면 씀씀이와 마음이 넉넉해집니다. 둘이 무언가를 시작할 때 운이 붙습니다.',
     tense: '즐거움이 앞서 지출과 약속이 커집니다. 기분 좋은 결정이 나중에 부담이 됩니다.',
+    tenseTitle: '넉넉함이 지출이 되는 자리',
   },
   'saturn-venus': {
     title: '애정의 무게',
@@ -305,6 +318,7 @@ const PAIR_TEXT: Record<string, Body> = {
     title: '밀고 나가는 힘',
     flow: '한 사람이 밀면 다른 사람이 판을 넓힙니다. 새 일을 시작할 때 힘이 붙습니다.',
     tense: '욕심이 겹칩니다. 계획 없이 벌였다가 둘이 같이 지칩니다.',
+    tenseTitle: '욕심이 겹치는 자리',
   },
   'mars-saturn': {
     title: '밀고 당기는 힘',
@@ -325,6 +339,7 @@ const PAIR_TEXT: Record<string, Body> = {
     title: '서로를 키우는 각',
     flow: '한 사람 곁에서 다른 사람이 더 자신감을 냅니다. 응원이 실제 성장으로 이어집니다.',
     tense: '기대가 커져 실망도 커집니다. 내 기준을 상대에게 대신 맡기게 됩니다.',
+    tenseTitle: '기대가 커지는 각',
   },
   'saturn-sun': {
     title: '책임과 무게',
@@ -350,6 +365,7 @@ const PAIR_TEXT: Record<string, Body> = {
     title: '기회의 문',
     flow: '상대에게 열린 인상을 줍니다. 소개와 연결이 잘 붙습니다.',
     tense: '인상은 좋은데 실제 약속이 가볍습니다. 기대만 키우고 지키지 못합니다.',
+    tenseTitle: '약속이 가벼운 자리',
   },
   'asc-asc': {
     title: '사는 속도',
@@ -366,6 +382,37 @@ const FALLBACK_TEXT: Body = {
 
 function textOf(pair: string): Body {
   return PAIR_TEXT[pair] ?? FALLBACK_TEXT;
+}
+
+/* ---------------------------- 조사 처리 ---------------------------- */
+
+const JOSA_PAIRS: Record<string, [string, string]> = {
+  은는: ['은', '는'],
+  이가: ['이', '가'],
+  을를: ['을', '를'],
+  과와: ['과', '와'],
+  으로로: ['으로', '로'],
+};
+
+/** 이름·단어 끝의 받침을 보고 조사를 붙입니다. (한글 이름·영문 이름 모두 처리) */
+export function withJosa(word: string, kind: keyof typeof JOSA_PAIRS): string {
+  const w = (word ?? '').trim();
+  if (!w) return '';
+  const last = w[w.length - 1];
+  const code = last.charCodeAt(0);
+  const pair = JOSA_PAIRS[kind] ?? ['', ''];
+  if (code < 0xac00 || code > 0xd7a3) {
+    // 한글이 아니면 숫자만 받침 판정(0·1·3·6·7·8), 나머지는 받침 없음으로 봅니다.
+    const hasBatchim = /[013678]$/.test(last);
+    return w + (hasBatchim ? pair[0] : pair[1]);
+  }
+  const hasBatchim = (code - 0xac00) % 28 !== 0;
+  return w + (hasBatchim ? pair[0] : pair[1]);
+}
+
+/** 어느 사람의 행성인지 — 무료 프리뷰·리포트가 같은 표기를 씁니다. */
+export function ownerLabel(asp: SynastryAspect): string {
+  return `내 ${asp.a.name} · 상대 ${asp.b.name}`;
 }
 
 /* ---------------------------- 원소 궁합 ---------------------------- */
@@ -559,19 +606,22 @@ export function synastryOf(a: WesternModel, b: WesternModel): SynastryModel {
   const moonA = SIGNS[a.moon.signIndex];
   const moonB = SIGNS[b.moon.signIndex];
 
+  const corePair = (asp?: SynastryAspect) =>
+    asp ? `내 ${asp.a.name} · 상대의 ${asp.b.name} ${asp.type}` : '';
+
   /* 요약 — 3문장 */
   const summary = [
     `${elNote.note}`,
     flowTop
-      ? `가장 강하게 붙는 자리는 ${flowTop.a.name}과 ${flowTop.b.name}의 ${flowTop.type}입니다. ${flowTop.body}`
+      ? `가장 강하게 붙는 자리는 '${corePair(flowTop)}'입니다. ${flowTop.body}`
       : '두 천궁도에서 강하게 붙는 각은 많지 않습니다. 대신 생활의 규칙이 관계를 지탱합니다.',
     tenseTop
-      ? `가장 조심할 자리는 ${tenseTop.a.name}과 ${tenseTop.b.name}의 ${tenseTop.type}입니다. ${tenseTop.body}`
+      ? `가장 조심할 자리는 '${corePair(tenseTop)}'입니다. ${tenseTop.body}`
       : '크게 부딪히는 각은 없습니다. 다만 서로 다른 속도를 무시하면 서운함이 쌓입니다.',
   ].join(' ');
 
   const oneLine = flowTop
-    ? `${bandOf(score).line} ${flowTop.a.name}과 ${flowTop.b.name}의 ${flowTop.type}이 이 관계의 힘입니다.`
+    ? `${bandOf(score).line} ${corePair(flowTop)}이 이 관계의 힘입니다.`
     : bandOf(score).line;
 
   /* 관계 역학 3개 */
@@ -579,38 +629,44 @@ export function synastryOf(a: WesternModel, b: WesternModel): SynastryModel {
     {
       title: '관계를 굴러가게 하는 힘',
       body: flowTop
-        ? `두 사람의 ${flowTop.a.name}과 ${flowTop.b.name}이 ${flowTop.type}으로 이어집니다. ${flowTop.body}`
+        ? `내 ${flowTop.a.name} · 상대의 ${flowTop.b.name} ${withJosa(flowTop.type, '으로로')} 이어집니다. ${flowTop.body}`
         : '눈에 띄게 강한 각은 없습니다. 이 관계는 감정의 파도보다 함께 쌓는 습관으로 굴러갑니다.',
     },
     {
       title: '겉으로 보이는 온도',
-      body: `${nameA}는 어센던트 ${a.rising.name}로 먼저 다가가고, ${nameB}는 ${b.rising.name}로 받습니다. ${a.rising.name}의 인상은 "${a.rising.keyword}", ${b.rising.name}의 인상은 "${b.rising.keyword}"입니다. ${sunA.name}의 중심과 ${sunB.name}의 중심이 만나는 방식이 여기서 결정됩니다.`,
+      body: `${withJosa(nameA, '은는')} 어센던트 ${withJosa(a.rising.name, '으로로')} 먼저 다가가고, ${withJosa(
+        nameB,
+        '은는',
+      )} ${withJosa(b.rising.name, '으로로')} 받습니다. ${a.rising.name}의 인상은 "${a.rising.keyword}", ${b.rising.name}의 인상은 "${b.rising.keyword}"입니다. ${sunA.name}의 중심과 ${sunB.name}의 중심이 만나는 방식이 여기서 결정됩니다.`,
     },
     {
       title: '쉴 때의 모습',
-      body: `${nameA}의 달은 ${moonA.name}, ${nameB}의 달은 ${moonB.name}입니다. ${moonA.love} ${moonB.love}`,
+      body: `${nameA}의 달은 ${moonA.name} — ${moonA.love} ${nameB}의 달은 ${moonB.name} — ${moonB.love}`,
     },
   ];
 
   /* 갈등 포인트 3개 */
   const conflicts: Array<{ title: string; body: string; fix: string }> = [
     {
-      title: tenseTop ? `${tenseTop.title} — ${tenseTop.type} ${tenseTop.angle}°` : '속도의 차이',
+      title: tenseTop ? `${titleOf(tenseTop)} — ${tenseTop.type} ${tenseTop.angle}°` : '속도의 차이',
       body: tenseTop
-        ? tenseTop.body
+        ? `'${corePair(tenseTop)}'의 각입니다. ${tenseTop.body}`
         : '두 천궁도에 강한 마찰 각은 없습니다. 대신 원소가 달라 하루를 보내는 속도가 다릅니다.',
       fix: tenseTop
-        ? `${tenseTop.a.name} 쪽 이야기가 나올 때 결론을 바로 내지 않기. 하루 뒤에 다시 꺼내면 같은 말이 훨씬 부드럽게 전달됩니다.`
+        ? `'${corePair(tenseTop)}' 이야기가 나올 때는 그 자리에서 정리하려 하지 않기. 하루 뒤에 다시 꺼내면 같은 말이 훨씬 부드럽게 전달됩니다.`
         : '중요한 결정은 두 사람이 모두 쉬는 시간에 하기. 피곤한 상태의 결론은 서로에게 오래 남습니다.',
     },
     {
       title: `${elNote.label} — 생활의 리듬`,
-      body: `${nameA}는 ${elA} 기운이 강하고, ${nameB}는 ${elB} 기운이 강합니다. ${elNote.note}`,
+      body: `${withJosa(nameA, '은는')} ${elA} 기운이 강하고, ${withJosa(nameB, '은는')} ${elB} 기운이 강합니다. ${elNote.note}`,
       fix: `집안일·약속·연락처럼 매일 반복되는 일은 '누가 먼저' 대신 '무엇을' 기준으로 나누기. ${elA} 쪽은 시작을, ${elB} 쪽은 마무리를 맡기면 마찰이 줄어듭니다.`,
     },
     {
       title: `${moonA.name}의 달 × ${moonB.name}의 달 — 위로의 방식`,
-      body: `${nameA}는 ${moonA.shadow.replace(/\.$/, '')} 쪽에서 상처를 받고, ${nameB}는 ${moonB.shadow.replace(/\.$/, '')} 쪽에서 서운함을 느낍니다. 같은 날 두 가지가 겹치면 사소한 말이 오래 남습니다.`,
+      body: `${withJosa(nameA, '은는')} ${moonA.shadow.replace(/\.$/, '')} 쪽에서 상처를 받고, ${withJosa(
+        nameB,
+        '은는',
+      )} ${moonB.shadow.replace(/\.$/, '')} 쪽에서 서운함을 느낍니다. 같은 날 두 가지가 겹치면 사소한 말이 오래 남습니다.`,
       fix: '감정이 올라온 날에는 결론을 내지 않기. "지금은 정리하고 내일 이야기하자"는 한 문장을 미리 정해 두면 그 문장이 관계를 지켜 줍니다.',
     },
   ];
@@ -619,8 +675,8 @@ export function synastryOf(a: WesternModel, b: WesternModel): SynastryModel {
   const marsA = SIGNS[a.planets.find((p) => p.key === 'mars')!.signIndex];
   const marsB = SIGNS[b.planets.find((p) => p.key === 'mars')!.signIndex];
   const advice = [
-    `결정은 ${marsA.name}의 속도를 가진 ${nameA}가 먼저 꺼내고, 실행은 ${marsB.name}의 방식으로 움직이는 ${nameB}가 맡기. ${marsA.work.split('.')[0]}. ${marsB.work.split('.')[0]}.`,
-    `한 주에 한 번은 ${flowTop ? `${flowTop.a.name}·${flowTop.b.name}의 ${flowTop.type}` : '서로 잘 맞는 영역'}이 살아나는 일을 함께 하기. 잘 맞는 자리를 일부러 반복하면 어긋나는 자리가 덜 아픕니다.`,
+    `결정은 ${marsA.name}의 속도를 가진 ${withJosa(nameA, '이가')} 먼저 꺼내고, 실행은 ${marsB.name}의 방식으로 움직이는 ${withJosa(nameB, '이가')} 맡기. ${marsA.work.split('.')[0]}. ${marsB.work.split('.')[0]}.`,
+    `한 주에 한 번은 ${flowTop ? `'${corePair(flowTop)}'` : '서로 잘 맞는 영역'}이 살아나는 일을 함께 하기. 잘 맞는 자리를 일부러 반복하면 어긋나는 자리가 덜 아픕니다.`,
     `${harmony >= 0.8 ? '두 사람의 원소가 잘 맞는 편입니다. 편안함에 기대어 말을 미루지만 않으면 됩니다.' : '원소가 다른 편입니다. 상대가 지금 어떤 속도로 살고 있는지 한 달에 한 번은 물어보기. 이 한 번의 질문이 오해를 크게 줄입니다.'}`,
   ];
 
@@ -657,16 +713,4 @@ export function synastryOf(a: WesternModel, b: WesternModel): SynastryModel {
     advice,
     roles,
   };
-}
-
-/** 각 한 줄 표기 — 화면·리포트가 같은 문장을 씁니다. */
-export function aspectHeading(asp: SynastryAspect, nameA: string, nameB: string): string {
-  const ownerA = asp.a.key === 'asc' ? nameA : nameA;
-  const ownerB = asp.b.key === 'asc' ? nameB : nameB;
-  return `${ownerA} ${asp.a.name} · ${ownerB} ${asp.b.name} · ${asp.type} ${asp.angle}° (오브 ${asp.orb}°)`;
-}
-
-/** 각의 방향(누가 누구에게)을 문장으로 — 리포트의 세부 줄에 씁니다. */
-export function aspectDialog(asp: SynastryAspect): string {
-  return `${asp.a.name} → ${asp.b.name}`;
 }

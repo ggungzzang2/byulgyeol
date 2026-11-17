@@ -308,7 +308,7 @@ export default function SynastryPreview({ model, onUpgrade, onClose }: Props) {
                   {syn.core.map((asp) => (
                     <div key={`${asp.pair}-${asp.type}`}>
                       <p className="text-[11px] font-semibold t-body">
-                        {asp.a.name} · {asp.b.name} {asp.type} {asp.angle}°
+                        내 {asp.a.name} · 상대 {asp.b.name} {asp.type} {asp.angle}°
                         <span className="num ml-1 text-[9.5px] t-faint">오브 {asp.orb}°</span>
                       </p>
                       <p className="mt-0.5 text-[11.5px] leading-[1.75] t-muted">{asp.body}</p>
