@@ -250,13 +250,13 @@ export default function WesternLanding({ onSubmit, onSample, onProduct }: Props)
       <section id="western-reports" className="mx-auto mt-12 max-w-5xl scroll-mt-20 px-5 sm:px-8">
         <SectionLabel index="✶">WESTERN REPORTS</SectionLabel>
         <h2 className="t-display mt-3 text-[22px]">
-          {isCharacter ? '서양 점성술 리포트' : '서양 점성술 리포트 두 가지'}
+          {isCharacter ? '서양 점성술 리포트' : '서양 점성술 리포트 세 가지'}
         </h2>
-        <p className="mt-2 max-w-[360px] text-[12px] leading-[1.9] t-muted">
+        <p className="mt-2 max-w-[380px] text-[12px] leading-[1.9] t-muted">
           자미두수 리포트와는 별개 상품입니다. 여기서 결제하는 것은 <b style={{ color: 'var(--accent-deep)' }}>천궁도</b> 리포트예요.
         </p>
 
-        <div className="mt-5 grid gap-3.5 sm:grid-cols-2">
+        <div className="mt-5 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
           {WESTERN_PRODUCTS.map((p) => (
             <div
               key={p.id}

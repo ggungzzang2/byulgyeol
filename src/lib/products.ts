@@ -1,7 +1,7 @@
 import type { ThemeId } from './theme';
 import type { ProductSystem } from './systems';
 
-export type ProductId = 'basic' | 'premium' | 'compat' | 'western' | 'bundle' | 'newyear2027';
+export type ProductId = 'basic' | 'premium' | 'compat' | 'western' | 'synastry' | 'bundle' | 'newyear2027';
 
 export type Product = {
   id: ProductId;
@@ -70,6 +70,23 @@ export const PRODUCTS: Product[] = [
       '주요 각(합·삼분·사분) 해석',
       '금전·연애·일 3지수',
     ],
+  },
+  {
+    id: 'synastry',
+    system: 'western',
+    name: '두 사람 시너스트리 궁합',
+    hanja: '合圖 星緣',
+    price: 6900,
+    originalPrice: 9900,
+    tagline: '두 사람의 행성이 만드는 각',
+    points: [
+      '두 천궁도의 행성 교차 각 전체',
+      '감정·끌림·오래 가는 힘 3지수',
+      '관계 역학 — 겉으로 보이는 온도와 쉴 때의 모습',
+      '갈등 포인트 3개와 넘는 법',
+      '역할 나누기와 보완 조언',
+    ],
+    badge: '시너스트리',
   },
   {
     id: 'newyear2027',
@@ -151,6 +168,11 @@ export function productTagline(product: Product, theme: ThemeId): string {
       ? '열두 달 흐름 · 보완 기운 · 수호 원석까지'
       : '2027년 열두 달의 흐름과 보완 기운, 수호 원석 처방';
   }
+  if (product.id === 'synastry') {
+    return theme === 'character'
+      ? '두 사람 행성이 만드는 각 — 점수는 무료, 해석은 심층에서'
+      : '두 천궁도의 행성 교차 각 — 점수는 무료, 해석은 심층에서';
+  }
   if (theme === 'character' && product.id === 'basic') return '명궁·연애·재물·진로·배우자상 핵심만, 커피 한 잔 값으로';
   if (theme === 'character' && product.id === 'western') return '네가 태어난 하늘의 좌표 — 태양·달·어센던트';
   if (theme === 'character' && product.id === 'bundle') return '동양 별지도 + 서양 천궁도, 한 번에';
@@ -193,6 +215,23 @@ export function productPoints(product: Product, theme: ThemeId): string[] {
       '금전·연애·일 3지수',
     ];
   }
+  if (product.id === 'synastry') {
+    return theme === 'character'
+      ? [
+          '두 천궁도의 교차 각 전체',
+          '감정의 온도 · 끌림의 세기 · 오래 가는 힘',
+          '겉으로 보이는 온도와 쉴 때의 모습',
+          '부딪히는 장면 3개와 넘는 법',
+          '역할 나누기와 보완 조언',
+        ]
+      : [
+          '두 천궁도의 행성 교차 각 전체',
+          '감정의 온도 · 끌림의 세기 · 오래 가는 힘 3지수',
+          '관계 역학 — 겉으로 보이는 온도와 쉴 때의 모습',
+          '갈등 포인트 3개와 넘는 법',
+          '역할 나누기와 보완 조언',
+        ];
+  }
   if (theme === 'character' && product.id === 'bundle') {
     return [
       '동양 별지도 12개 별방 전체',
@@ -222,6 +261,9 @@ export function productScopeShort(product: Product, theme: ThemeId): string | nu
   }
   if (product.id === 'western') {
     return '서양 점성술 단독 · 자미두수 12궁은 포함되지 않음';
+  }
+  if (product.id === 'synastry') {
+    return '서양 점성술 궁합 · 두 사람 교차 각 전체 포함';
   }
   if (product.id === 'bundle') {
     const sum =
@@ -255,6 +297,11 @@ export function productScopeNote(product: Product, theme: ThemeId): string | nul
       ? '태양·달·어센던트, 행성 7개의 자리와 하우스, 12개 하우스 풀이까지 담긴 서양 점성술 리포트야. 동양 자미두수 해설은 들어 있지 않아 — 그건 다른 리포트야!'
       : '태양·달·어센던트, 행성 7개의 자리와 하우스, 12하우스 풀이까지 담긴 서양 점성술 리포트입니다. 동양 자미두수 해설은 포함되지 않습니다.';
   }
+  if (product.id === 'synastry') {
+    return theme === 'character'
+      ? '두 사람 천궁도의 행성을 교차로 맞댄 시너스트리 리포트야. 교차 각 전체와 관계 역학, 부딪히는 장면, 역할 나누기까지 담겨 있어. 한 사람 단독 천궁도 해설은 담기지 않아.'
+      : '두 사람 천궁도의 행성을 교차로 맞댄 시너스트리 리포트입니다. 교차 각 전체와 관계 역학, 갈등 포인트, 역할 나누기까지 포함합니다. 한 사람 단독 천궁도 해설은 포함되지 않습니다.';
+  }
   if (product.id === 'bundle') {
     return theme === 'character'
       ? '동양 자미두수 12개 별방 전체와 서양 천궁도 전체를 한 번에 여는 리포트야. 두 체계가 같은 곳을 가리킬 때의 교차 해석까지 들어 있어.'
@@ -267,12 +314,14 @@ export function productBadge(product: Product, theme: ThemeId): string | undefin
   if (product.id === 'newyear2027') return '✦ 2027 신년';
   if (theme === 'character' && product.id === 'basic') return '☕ 커피 한 잔 값';
   if (theme === 'character' && product.id === 'western') return '✶ 서양 점성술';
+  if (product.id === 'synastry') return '✶ 시너스트리';
   if (theme === 'character' && product.id === 'bundle') return '✦ 통합';
   return product.badge;
 }
 
 export function productCta(product: Product, theme: ThemeId): string {
   if (product.id === 'newyear2027') return '2027 리포트 열기';
+  if (product.id === 'synastry') return theme === 'character' ? '두 사람 궁합 점수 보기' : '시너스트리 점수 보기';
   if (theme === 'character') {
     if (product.id === 'basic') return '3,900원으로 내 별 읽기';
     if (product.id === 'premium') return '12개 별방 전부 보기';
@@ -288,6 +337,7 @@ export function productCta(product: Product, theme: ThemeId): string {
 
 export function productShortCta(product: Product, theme: ThemeId): string {
   if (product.id === 'newyear2027') return '2027 열기';
+  if (product.id === 'synastry') return '궁합 보기';
   if (theme === 'character') {
     if (product.id === 'basic') return '3,900원으로 열기';
     if (product.id === 'premium') return '전체 보기';
@@ -303,6 +353,9 @@ export function productShortCta(product: Product, theme: ThemeId): string {
 
 /** 결제 모달 상단에 붙는 체계 표기 — 어떤 체계를 사는지 한 줄로 못 박습니다. */
 export function productSystemLabel(product: Product): { title: string; sub: string } {
+  if (product.id === 'synastry') {
+    return { title: '서양 점성술 · 시너스트리 궁합', sub: 'SYNASTRY · 두 사람의 행성 교차 각' };
+  }
   if (product.system === 'western') {
     return { title: '서양 점성술 · 출생 천궁도', sub: 'WESTERN NATAL CHART · 태양 · 달 · 어센던트 · 행성 하우스' };
   }

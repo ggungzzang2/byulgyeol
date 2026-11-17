@@ -14,10 +14,12 @@ import CompatReport from './components/CompatReport';
 import CompatPreview from './components/CompatPreview';
 import WesternView from './components/WesternView';
 import WesternReport from './components/WesternReport';
+import SynastryPreview from './components/SynastryPreview';
+import SynastryReport from './components/SynastryReport';
 import NewYearReport from './components/NewYearReport';
 import ThemeToggle from './components/ThemeToggle';
 
-type View = 'landing' | 'chart' | 'report' | 'compat' | 'western' | 'westernReport' | 'newyear2027';
+type View = 'landing' | 'chart' | 'report' | 'compat' | 'western' | 'westernReport' | 'synastry' | 'newyear2027';
 
 export default function App() {
   const [theme, setThemeState] = useState<ThemeId>(() => readThemeFromUrl());
@@ -30,8 +32,14 @@ export default function App() {
   const [pendingProduct, setPendingProduct] = useState<ProductId | null>(null);
   /** 궁합 무료 프리뷰(점수 먼저) — 결제 전 단계 */
   const [compatPreview, setCompatPreview] = useState(false);
+  /** 시너스트리(서양 점성술 두 사람 궁합) 무료 프리뷰 — 결제 전 단계 */
+  const [synastryPreview, setSynastryPreview] = useState(false);
+  /** 시너스트리 상대방 천궁도와 열람 여부 */
+  const [partnerWestern, setPartnerWestern] = useState<WesternModel | null>(null);
+  const [synastryPaid, setSynastryPaid] = useState(false);
   /** 프리뷰에서 입력한 상대방 정보 — 결제 모달에 그대로 넘겨 재입력을 없앱니다. */
   const [partnerDraft, setPartnerDraft] = useState<BirthInput | null>(null);
+  const [synastryDraft, setSynastryDraft] = useState<BirthInput | null>(null);
   const [ziweiTier, setZiweiTier] = useState<'none' | 'basic' | 'premium'>('none');
   const [westernPaid, setWesternPaid] = useState(false);
   const [hasBundle, setHasBundle] = useState(false);
@@ -105,6 +113,21 @@ export default function App() {
 
   const handleProductFromLanding = (id: ProductId) => {
     const product = findProduct(id);
+    // 시너스트리 상품은 천궁도가 있으면 무료 점수 프리뷰부터 엽니다.
+    if (id === 'synastry') {
+      if (western) {
+        setSynastryPreview(true);
+        return;
+      }
+      if (system !== 'western') setSystem('western');
+      document.getElementById('western-chart')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      flash(
+        theme === 'character'
+          ? '먼저 네 천궁도를 그리면 상대와의 궁합 점수를 바로 볼 수 있어!'
+          : '먼저 내 천궁도를 열면 두 사람의 궁합 점수를 무료로 볼 수 있습니다.',
+      );
+      return;
+    }
     // 궁합 상품은 결과가 있으면 무료 점수 → 유료 심층 동선으로 안내합니다.
     if (id === 'compat' && chart) {
       setCompatPreview(true);
@@ -164,6 +187,16 @@ export default function App() {
       setCompatPreview(true);
       return;
     }
+    // 시너스트리도 결제창보다 무료 점수 프리뷰를 먼저 엽니다. (이미 결제한 상대가 있으면 바로 리포트)
+    if (id === 'synastry') {
+      setCheckout(null);
+      if (synastryPaid && partnerWestern) {
+        setView('synastry');
+        return;
+      }
+      setSynastryPreview(true);
+      return;
+    }
     if (id === 'western' && westernPaid) {
       setView('westernReport');
       return;
@@ -197,6 +230,18 @@ export default function App() {
         setView('compat');
       } catch {
         flash('상대방 명반을 계산하지 못했어요. 생년월일을 확인해 주세요.');
+      }
+      return;
+    }
+
+    if (id === 'synastry') {
+      if (!partnerInput) return;
+      try {
+        setPartnerWestern(await buildWestern(partnerInput));
+        setSynastryPaid(true);
+        setView('synastry');
+      } catch {
+        flash('상대방 천궁도를 계산하지 못했어요. 생년월일을 확인해 주세요.');
       }
       return;
     }
@@ -268,6 +313,8 @@ export default function App() {
               setChart(null);
               setWestern(null);
               setPartner(null);
+              setPartnerWestern(null);
+              setSynastryPaid(false);
               setZiweiTier('none');
               setWesternPaid(false);
               setHasBundle(false);
@@ -295,12 +342,21 @@ export default function App() {
               setChart(null);
               setWestern(null);
               setPartner(null);
+              setPartnerWestern(null);
+              setSynastryPaid(false);
               setZiweiTier('none');
               setWesternPaid(false);
               setHasBundle(false);
               setView('landing');
             }}
             onUnlock={handleUnlock}
+            onSynastry={() => {
+              if (synastryPaid && partnerWestern) {
+                setView('synastry');
+                return;
+              }
+              setSynastryPreview(true);
+            }}
           />
         )}
 
@@ -347,11 +403,36 @@ export default function App() {
           />
         )}
 
+        {view === 'synastry' && western && partnerWestern && (
+          <SynastryReport
+            model={western}
+            partner={partnerWestern}
+            onBack={() => setView('western')}
+            onAgain={() => {
+              setSynastryPaid(false);
+              setPartnerWestern(null);
+              setSynastryPreview(true);
+            }}
+          />
+        )}
+
+        {synastryPreview && western && (
+          <SynastryPreview
+            model={western}
+            onClose={() => setSynastryPreview(false)}
+            onUpgrade={(input) => {
+              setSynastryDraft(input);
+              setSynastryPreview(false);
+              setCheckout(findProduct('synastry'));
+            }}
+          />
+        )}
+
         {checkout && chart && (
           <CheckoutModal
             product={checkout}
             chartName={chart.name}
-            initialPartner={checkout.id === 'compat' ? partnerDraft : null}
+            initialPartner={checkout.id === 'compat' ? partnerDraft : checkout.id === 'synastry' ? synastryDraft : null}
             onClose={() => setCheckout(null)}
             onPaid={handlePaid}
             onSelect={(id) => setCheckout(findProduct(id))}

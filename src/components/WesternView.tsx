@@ -19,10 +19,12 @@ type Props = {
   onSystemChange: (system: SystemId) => void;
   onReset: () => void;
   onUnlock: (id: ProductId) => void;
+  /** 두 사람 시너스트리 무료 점수 프리뷰 */
+  onSynastry: () => void;
 };
 
 /** 서양 점성술 무료 결과 — 자미두수 결과 화면과 완전히 분리된 동선입니다. */
-export default function WesternView({ model, onSystemChange, onReset, onUnlock }: Props) {
+export default function WesternView({ model, onSystemChange, onReset, onUnlock, onSynastry }: Props) {
   const { theme } = useTheme();
   const isCharacter = theme === 'character';
   const sunSign = SIGNS[model.sun.signIndex];
@@ -318,6 +320,56 @@ export default function WesternView({ model, onSystemChange, onReset, onUnlock }
           </section>
         )}
 
+        {/* 시너스트리 궁합 — 두 사람 천궁도 교차 */}
+        <section className="mt-12">
+          <SectionLabel index="06">SYNASTRY · 두 사람 궁합</SectionLabel>
+          <h2 className="t-display mt-3 text-[22px] leading-[1.45] sm:text-[26px]">
+            내 하늘과 다른 하늘이
+            <br className="sm:hidden" /> 만나는 자리
+          </h2>
+          <p className="mt-2 max-w-[440px] text-[11.5px] leading-[1.85] t-muted">
+            서양 점성술의 궁합은 두 사람의 행성을 서로 맞대어 봅니다. 태양·달·금성·화성·수성과 어센던트가
+            어떤 각(합·육분·사분·삼분·대립)으로 만나는지로 사이의 온도를 읽습니다.
+          </p>
+          <div className="mt-4 grid gap-3.5 sm:grid-cols-[1.1fr_0.9fr]">
+            <div className="t-card p-5">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] tracking-[0.16em] t-faint">MY SKY</p>
+                <span className="t-chip !text-[10px]">
+                  ☉ {sunSign.name} · ☾ {moonSign.name}
+                </span>
+              </div>
+              <div className="mt-3 flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[16px]" style={{ background: 'var(--accent-soft)', color: 'var(--accent-deep)' }} aria-hidden="true">
+                  ✶
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[12px] font-semibold t-body">상대방 생년월일만 있으면 바로 점수가 나옵니다</p>
+                  <p className="mt-0.5 text-[10.5px] leading-[1.7] t-faint">
+                    무료로 시너스트리 지수와 핵심 각 2개까지 볼 수 있어요.
+                  </p>
+                </div>
+              </div>
+              <button onClick={onSynastry} className="t-btn t-btn-primary mt-4 w-full py-3 text-[12px]">
+                <StarMark className="h-3.5 w-3.5" />
+                {isCharacter ? '두 사람 궁합 점수 보기' : '무료 시너스트리 점수 보기'}
+              </button>
+              <p className="mt-2 text-center text-[10px] t-faint">점수 무료 · 교차 각 전체와 해석은 심층 리포트</p>
+            </div>
+            <div className="t-card p-5">
+              <p className="text-[10px] tracking-[0.16em] t-faint">어떻게 계산하나</p>
+              <ul className="mt-2.5 space-y-1.5 text-[11px] leading-[1.75] t-muted">
+                <li>· 행성 교차 각(합 0° · 육분 60° · 사분 90° · 삼분 120° · 대립 180°)</li>
+                <li>· 원소(불·흙·공기·물) 조화</li>
+                <li>· 감정·끌림·오래 가는 힘 세 축으로 점수화</li>
+              </ul>
+              <p className="mt-3 border-t pt-2.5 text-[10.5px] leading-[1.75] t-faint" style={{ borderColor: 'var(--line)' }}>
+                자미두수 궁합(명궁 주성 비교)과는 계산이 완전히 다릅니다.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* 잠금 영역 */}
         <section className="mt-12">
           <div className="t-panel p-6 sm:p-8">
@@ -359,9 +411,9 @@ export default function WesternView({ model, onSystemChange, onReset, onUnlock }
           <SectionLabel index="✶">WESTERN REPORTS</SectionLabel>
           <h2 className="t-display mt-3 text-[22px]">서양 점성술 리포트</h2>
           <p className="mt-2 text-[11.5px] t-muted">
-            아래 두 상품은 서양 점성술 동선입니다. 자미두수 리포트는 위쪽 ‘동양 자미두수’ 탭에서 결제할 수 있어요.
+            아래 세 상품은 서양 점성술 동선입니다. 자미두수 리포트는 위쪽 ‘동양 자미두수’ 탭에서 결제할 수 있어요.
           </p>
-          <div className="mt-4 grid gap-3.5 sm:grid-cols-2">
+          <div className="mt-4 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
             {WESTERN_PRODUCTS.map((p) => (
               <div key={p.id} className="t-card flex flex-col p-5">
                 <div className="flex items-baseline justify-between gap-2">

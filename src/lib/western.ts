@@ -10,7 +10,7 @@
  * - 하우스: 어센던트 자리부터 사인 하나씩 = Whole Sign 하우스
  *   (출생지를 입력받지 않으므로 서울 좌표를 기본값으로 쓰고 화면에 명시합니다)
  */
-import type { BirthInput } from './chart';
+import type { BirthInput, Gender } from './chart';
 import { lunarToSolar } from './chart';
 
 const D2R = Math.PI / 180;
@@ -286,6 +286,7 @@ export type WesternAspect = {
 
 export type WesternModel = {
   name: string;
+  gender: Gender;
   solarText: string;
   timeText: string;
   timeKnown: boolean;
@@ -631,6 +632,7 @@ export async function buildWestern(input: BirthInput): Promise<WesternModel> {
 
   return {
     name: input.name.trim(),
+    gender: input.gender,
     solarText: `${solar.year}. ${solar.month}. ${solar.day}.`,
     timeText: input.timeKnown
       ? `${String(Math.floor(localHour)).padStart(2, '0')}:${String(Math.round((localHour % 1) * 60)).padStart(2, '0')} (KST)`

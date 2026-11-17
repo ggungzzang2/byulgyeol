@@ -82,7 +82,7 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
       setError(isCharacter ? '동의 체크를 먼저 눌러줘!' : '결제 진행에 동의해 주세요.');
       return;
     }
-    if (product.id === 'compat' && (!pYear || !pMonth || !pDay)) {
+    if ((product.id === 'compat' || product.id === 'synastry') && (!pYear || !pMonth || !pDay)) {
       setError(isCharacter ? '상대방의 태어난 날도 알려줘!' : '상대방의 생년월일을 입력해 주세요.');
       return;
     }
@@ -92,7 +92,7 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
       setStage('done');
       window.setTimeout(() => {
         onPaid(
-          product.id === 'compat'
+          product.id === 'compat' || product.id === 'synastry'
             ? {
                 name: pName,
                 year: Number(pYear),
@@ -271,9 +271,11 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
             </div>
           )}
 
-          {product.id === 'compat' && (
+          {(product.id === 'compat' || product.id === 'synastry') && (
             <div className="mt-4 rounded-2xl p-4" style={{ border: '1px solid var(--line)' }}>
-              <p className="mb-3 text-[11px] font-semibold tracking-[0.08em] t-muted">{copy.checkout.partner}</p>
+              <p className="mb-3 text-[11px] font-semibold tracking-[0.08em] t-muted">
+                {product.id === 'synastry' ? '궁합을 볼 상대방 정보' : copy.checkout.partner}
+              </p>
               <input
                 className="t-field mb-2 !text-[13px]"
                 placeholder="이름 (선택)"
@@ -371,11 +373,13 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
             {stage === 'form' && (
               <>
                 <LockIcon className="h-3.5 w-3.5" />
-                {lane === 'western'
-                  ? `서양 점성술 리포트 ${productPrice(product, theme).toLocaleString('ko-KR')}원 결제하고 열기`
-                  : lane === 'both'
-                    ? `통합 리포트 ${productPrice(product, theme).toLocaleString('ko-KR')}원 결제하고 열기`
-                    : copy.checkout.pay(productPrice(product, theme).toLocaleString('ko-KR'))}
+                {product.id === 'synastry'
+                  ? `${productPrice(product, theme).toLocaleString('ko-KR')}원 결제하고 심층 시너스트리 보기`
+                  : lane === 'western'
+                    ? `서양 점성술 리포트 ${productPrice(product, theme).toLocaleString('ko-KR')}원 결제하고 열기`
+                    : lane === 'both'
+                      ? `통합 리포트 ${productPrice(product, theme).toLocaleString('ko-KR')}원 결제하고 열기`
+                      : copy.checkout.pay(productPrice(product, theme).toLocaleString('ko-KR'))}
               </>
             )}
             {stage === 'processing' && (
