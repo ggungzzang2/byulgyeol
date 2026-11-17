@@ -220,6 +220,7 @@ const PAIR_TEXT: Record<string, Body> = {
     title: '감정의 온도',
     flow: '기분의 파도가 비슷해서 말하지 않아도 지금의 마음을 짐작합니다. 위로의 방식도 크게 다르지 않습니다.',
     tense: '마음이 가라앉는 방식이 다릅니다. 한 사람은 붙어 있어야 안심하고, 한 사람은 혼자 있어야 정리됩니다.',
+    tenseTitle: '감정이 엇갈리는 자리',
   },
   'mercury-moon': {
     title: '마음을 말로 옮기는 일',
@@ -292,6 +293,7 @@ const PAIR_TEXT: Record<string, Body> = {
     title: '끌림의 각',
     flow: '끌리는 마음과 움직이는 힘이 같은 방향을 봅니다. 다가가는 속도가 맞아 자연스럽게 가까워집니다.',
     tense: '끌림은 분명한데 방식이 어긋납니다. 한 사람은 밀고 한 사람은 물러서서 같은 마음이 엇갈립니다.',
+    tenseTitle: '끌림이 어긋나는 각',
   },
   'jupiter-venus': {
     title: '함께 넉넉해지는 자리',
@@ -609,9 +611,9 @@ export function synastryOf(a: WesternModel, b: WesternModel): SynastryModel {
   const corePair = (asp?: SynastryAspect) =>
     asp ? `내 ${asp.a.name} · 상대의 ${asp.b.name} ${asp.type}` : '';
 
-  /* 요약 — 3문장 */
+  /* 요약 — 3문장 (원소 이야기는 아래 원소 궁합 카드가 따로 맡습니다) */
   const summary = [
-    `${elNote.note}`,
+    `${withJosa(nameA, '은는')} ${elA}, ${withJosa(nameB, '은는')} ${elB} 기운이 강합니다.`,
     flowTop
       ? `가장 강하게 붙는 자리는 '${corePair(flowTop)}'입니다. ${flowTop.body}`
       : '두 천궁도에서 강하게 붙는 각은 많지 않습니다. 대신 생활의 규칙이 관계를 지탱합니다.',
@@ -641,7 +643,10 @@ export function synastryOf(a: WesternModel, b: WesternModel): SynastryModel {
     },
     {
       title: '쉴 때의 모습',
-      body: `${nameA}의 달은 ${moonA.name} — ${moonA.love} ${nameB}의 달은 ${moonB.name} — ${moonB.love}`,
+      body:
+        moonA.name === moonB.name
+          ? `두 사람의 달이 모두 ${moonA.name}입니다. ${moonA.love} 기분이 가라앉는 방식까지 비슷해서, 한 사람이 조용해지면 다른 한 사람도 같이 내려앉기 쉽습니다.`
+          : `${nameA}의 달은 ${moonA.name} — ${moonA.love} ${nameB}의 달은 ${moonB.name} — ${moonB.love}`,
     },
   ];
 
@@ -659,14 +664,23 @@ export function synastryOf(a: WesternModel, b: WesternModel): SynastryModel {
     {
       title: `${elNote.label} — 생활의 리듬`,
       body: `${withJosa(nameA, '은는')} ${elA} 기운이 강하고, ${withJosa(nameB, '은는')} ${elB} 기운이 강합니다. ${elNote.note}`,
-      fix: `집안일·약속·연락처럼 매일 반복되는 일은 '누가 먼저' 대신 '무엇을' 기준으로 나누기. ${elA} 쪽은 시작을, ${elB} 쪽은 마무리를 맡기면 마찰이 줄어듭니다.`,
+      fix:
+        elA === elB
+          ? `같은 ${elA} 기운이라 나누기보다 속도를 정하는 쪽이 낫습니다. 누가 시작을 맡고 언제 쉴지를 미리 정해 두면, 같은 기운이 서로를 밀어내지 않습니다.`
+          : `집안일·약속·연락처럼 매일 반복되는 일은 '누가 먼저' 대신 '무엇을' 기준으로 나누기. ${elA} 쪽은 시작을, ${elB} 쪽은 마무리를 맡기면 마찰이 줄어듭니다.`,
     },
     {
       title: `${moonA.name}의 달 × ${moonB.name}의 달 — 위로의 방식`,
-      body: `${withJosa(nameA, '은는')} ${moonA.shadow.replace(/\.$/, '')} 쪽에서 상처를 받고, ${withJosa(
-        nameB,
-        '은는',
-      )} ${moonB.shadow.replace(/\.$/, '')} 쪽에서 서운함을 느낍니다. 같은 날 두 가지가 겹치면 사소한 말이 오래 남습니다.`,
+      body:
+        moonA.name === moonB.name
+          ? `두 사람의 달이 같은 ${moonA.name}이라 상처의 지점도 같습니다. ${withJosa(nameA, '은는')} ${moonA.shadow.replace(/\.$/, '')} 쪽에서, ${withJosa(
+              nameB,
+              '은는',
+            )} 같은 지점에서 다칩니다. 그래서 같은 말이 한 사람에게는 위로, 다른 사람에게는 지적으로 들립니다.`
+          : `${withJosa(nameA, '은는')} ${moonA.shadow.replace(/\.$/, '')} 쪽에서 상처를 받고, ${withJosa(
+              nameB,
+              '은는',
+            )} ${moonB.shadow.replace(/\.$/, '')} 쪽에서 서운함을 느낍니다. 같은 날 두 가지가 겹치면 사소한 말이 오래 남습니다.`,
       fix: '감정이 올라온 날에는 결론을 내지 않기. "지금은 정리하고 내일 이야기하자"는 한 문장을 미리 정해 두면 그 문장이 관계를 지켜 줍니다.',
     },
   ];

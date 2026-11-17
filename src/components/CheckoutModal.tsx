@@ -283,7 +283,7 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
                 onChange={(e) => setPName(e.target.value)}
               />
               <div className="grid grid-cols-3 gap-2">
-                <select className="t-field num !text-[13px]" value={pYear} onChange={(e) => setPYear(e.target.value)}>
+                <select aria-label="상대방 태어난 해" className="t-field num !text-[13px]" value={pYear} onChange={(e) => setPYear(e.target.value)}>
                   <option value="">YYYY</option>
                   {YEARS.map((y) => (
                     <option key={y} value={y}>
@@ -291,7 +291,7 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
                     </option>
                   ))}
                 </select>
-                <select className="t-field num !text-[13px]" value={pMonth} onChange={(e) => setPMonth(e.target.value)}>
+                <select aria-label="상대방 태어난 달" className="t-field num !text-[13px]" value={pMonth} onChange={(e) => setPMonth(e.target.value)}>
                   <option value="">MM</option>
                   {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                     <option key={m} value={m}>
@@ -299,7 +299,7 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
                     </option>
                   ))}
                 </select>
-                <select className="t-field num !text-[13px]" value={pDay} onChange={(e) => setPDay(e.target.value)}>
+                <select aria-label="상대방 태어난 날" className="t-field num !text-[13px]" value={pDay} onChange={(e) => setPDay(e.target.value)}>
                   <option value="">DD</option>
                   {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
                     <option key={d} value={d}>
@@ -309,7 +309,7 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
                 </select>
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2">
-                <select className="t-field !text-[13px]" value={pTime} onChange={(e) => setPTime(e.target.value)}>
+                <select aria-label="상대방 태어난 시간" className="t-field !text-[13px]" value={pTime} onChange={(e) => setPTime(e.target.value)}>
                   <option value="unknown">시간 모름</option>
                   {TIME_OPTIONS.map((t) => (
                     <option key={t.index} value={t.index}>
@@ -317,7 +317,7 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
                     </option>
                   ))}
                 </select>
-                <select className="t-field !text-[13px]" value={pGender} onChange={(e) => setPGender(e.target.value as Gender)}>
+                <select aria-label="상대방 성별" className="t-field !text-[13px]" value={pGender} onChange={(e) => setPGender(e.target.value as Gender)}>
                   <option value="male">남성</option>
                   <option value="female">여성</option>
                 </select>

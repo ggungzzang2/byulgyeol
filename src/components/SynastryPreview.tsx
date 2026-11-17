@@ -252,24 +252,24 @@ export default function SynastryPreview({ model, onUpgrade, onClose }: Props) {
             <div className="animate-rise">
               {/* 무료 점수 */}
               <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-7">
-                <div className="relative flex h-[112px] w-[112px] shrink-0 items-center justify-center">
-                  <svg viewBox="0 0 120 120" className="absolute inset-0 h-full w-full -rotate-90">
-                    <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" strokeWidth="6" />
-                    <circle
-                      cx="60"
-                      cy="60"
-                      r="52"
-                      fill="none"
-                      stroke="var(--accent)"
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      strokeDasharray={`${(syn.score / 100) * 327} 327`}
-                    />
-                  </svg>
-                  <div className="text-center">
+                <div className="flex shrink-0 flex-col items-center gap-1.5">
+                  <div className="relative flex h-[104px] w-[104px] items-center justify-center">
+                    <svg viewBox="0 0 120 120" className="absolute inset-0 h-full w-full -rotate-90">
+                      <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" strokeWidth="6" />
+                      <circle
+                        cx="60"
+                        cy="60"
+                        r="52"
+                        fill="none"
+                        stroke="var(--accent)"
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                        strokeDasharray={`${(syn.score / 100) * 327} 327`}
+                      />
+                    </svg>
                     <p className="num t-title text-[30px] leading-none">{syn.score}</p>
-                    <p className="mt-1 text-[9.5px] t-faint">시너스트리 지수</p>
                   </div>
+                  <p className="text-[9.5px] t-faint">시너스트리 지수</p>
                 </div>
                 <div className="min-w-0 text-center sm:text-left">
                   <p className="text-[10px] tracking-[0.16em]" style={{ color: 'var(--accent-deep)' }}>
@@ -291,10 +291,11 @@ export default function SynastryPreview({ model, onUpgrade, onClose }: Props) {
                 ].map((p) => (
                   <div key={p.label} className="rounded-2xl px-3 py-2.5" style={{ background: 'var(--field-bg)', border: '1px solid var(--line)' }}>
                     <p className="truncate text-[10px] t-faint">{p.label}</p>
-                    <p className="mt-0.5 t-title text-[13px] leading-snug">
-                      ☉ {p.m.sun.signName} · ☾ {p.m.moon.signName}
+                    <p className="mt-0.5 truncate t-title text-[12.5px] leading-snug">☉ {p.m.sun.signName}</p>
+                    <p className="truncate t-title text-[12.5px] leading-snug">☾ {p.m.moon.signName}</p>
+                    <p className="mt-0.5 truncate text-[10px] t-muted">
+                      ASC {p.m.rising.name} · {p.m.dominantElement} 우세
                     </p>
-                    <p className="mt-0.5 text-[10.5px] t-muted">ASC {p.m.rising.name} · {p.m.dominantElement} 우세</p>
                   </div>
                 ))}
               </div>

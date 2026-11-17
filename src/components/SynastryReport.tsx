@@ -117,24 +117,24 @@ export default function SynastryReport({ model, partner, onBack, onAgain }: Prop
         {/* 점수 */}
         <section className="t-card mt-5 p-6 sm:p-8">
           <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-9">
-            <div className="relative flex h-[118px] w-[118px] shrink-0 items-center justify-center">
-              <svg viewBox="0 0 120 120" className="absolute inset-0 h-full w-full -rotate-90">
-                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" strokeWidth="6" />
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="52"
-                  fill="none"
-                  stroke="var(--accent)"
-                  strokeWidth="6"
-                  strokeLinecap="round"
-                  strokeDasharray={`${(syn.score / 100) * 327} 327`}
-                />
-              </svg>
-              <div className="text-center">
+            <div className="flex shrink-0 flex-col items-center gap-1.5">
+              <div className="relative flex h-[110px] w-[110px] items-center justify-center">
+                <svg viewBox="0 0 120 120" className="absolute inset-0 h-full w-full -rotate-90">
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" strokeWidth="6" />
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="52"
+                    fill="none"
+                    stroke="var(--accent)"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    strokeDasharray={`${(syn.score / 100) * 327} 327`}
+                  />
+                </svg>
                 <p className="num t-title text-[32px] leading-none">{syn.score}</p>
-                <p className="mt-1 text-[9.5px] t-faint">시너스트리 지수</p>
               </div>
+              <p className="text-[9.5px] t-faint">시너스트리 지수</p>
             </div>
             <div>
               <p className="text-[10px] tracking-[0.16em]" style={{ color: 'var(--accent-deep)' }}>
@@ -283,8 +283,9 @@ export default function SynastryReport({ model, partner, onBack, onAgain }: Prop
               <p className="text-[9.5px] tracking-[0.22em] t-panel-accent">BOTTOM LINE</p>
               <p className="t-panel-title mt-4 text-[17px] leading-[1.8] sm:text-[19px]">
                 {syn.band.line}
-                <br className="hidden sm:block" /> {withJosa(syn.nameA, '과와')} {syn.nameB}의 지수 {syn.score}는 변하지
-                않는 값이 아니라, 지금 두 사람이 어디에 힘을 쓰면 좋은지를 알려주는 좌표입니다.
+                <br className="hidden sm:block" /> {withJosa(syn.nameA, '과와')} {syn.nameB}의 지수{' '}
+                {withJosa(String(syn.score), '은는')} 변하지 않는 값이 아니라, 지금 두 사람이 어디에 힘을 쓰면 좋은지를
+                알려주는 좌표입니다.
               </p>
               <div className="mt-6 flex flex-wrap gap-2.5 no-print">
                 <button
