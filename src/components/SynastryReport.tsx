@@ -192,7 +192,9 @@ export default function SynastryReport({ model, partner, onBack, onAgain }: Prop
           <SectionLabel index="02">교차 각</SectionLabel>
           <h2 className="t-display mt-3 text-[21px]">행성끼리 만나는 자리</h2>
           <p className="mt-2 text-[11.5px] leading-[1.85] t-muted">
-            두 천궁도에서 찾은 주요 각 {syn.aspects.length}개를 영향이 큰 순서로 {topAspects.length}개 담았습니다.
+            {syn.aspects.length > topAspects.length
+              ? `두 천궁도에서 찾은 주요 각 ${syn.aspects.length}개 중 영향이 큰 ${topAspects.length}개를 담았습니다.`
+              : `두 천궁도에서 찾은 주요 각 ${syn.aspects.length}개를 영향이 큰 순서로 담았습니다.`}{' '}
             합·삼분·육분은 밀어 주는 각, 사분·대립은 부딪히는 각입니다.
           </p>
           <div className="mt-4 overflow-hidden rounded-2xl" style={{ border: '1px solid var(--line)' }}>
