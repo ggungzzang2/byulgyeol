@@ -5,6 +5,7 @@ import { compatibility, profileOf } from '../lib/content';
 import { findProduct, productPrice } from '../lib/products';
 import { TIME_OPTIONS } from '../lib/terms';
 import { useTheme } from '../lib/theme';
+import FreeOpenMeter from './FreeOpenMeter';
 import { LockIcon, StarMark } from './ui';
 
 type Props = {
@@ -276,7 +277,7 @@ export default function CompatPreview({ chart, onUpgrade, onClose }: Props) {
                 </div>
                 <div className="min-w-0 text-center sm:text-left">
                   <p className="text-[10px] tracking-[0.16em]" style={{ color: 'var(--accent-deep)' }}>
-                    무료 결과 · 두 사람의 케미
+                    무료 공개 30% · 두 사람의 케미
                   </p>
                   <h4 className="t-title mt-1.5 text-[18px] leading-snug">
                     {chart.primaryStar}
@@ -305,29 +306,20 @@ export default function CompatPreview({ chart, onUpgrade, onClose }: Props) {
               </div>
 
               {/* 잠긴 심층 */}
-              <div className="mt-4 rounded-2xl p-4" style={{ border: '1px dashed var(--line-strong)' }}>
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[10.5px] font-semibold tracking-[0.06em] t-muted">
-                    {isCharacter ? '심층 리포트에서 이어지는 이야기' : '심층 리포트에서 이어지는 내용'}
-                  </p>
-                  <LockIcon className="h-3.5 w-3.5 t-faint" />
-                </div>
-                <div className="mt-2 space-y-1.5">
-                  {[
-                    '구체적인 관계 해석 — 왜 이 조합이 이렇게 흘러가는지',
-                    '끌림 포인트 — 서로가 끌리는 지점과 살리는 법',
-                    '갈등 주의점 — 반복되는 부딪힘과 넘는 법',
-                  ].map((line) => (
-                    <p key={line} className="select-none text-[11.5px] leading-[1.7] blur-[3.5px] t-muted" aria-hidden="true">
-                      {line}
-                    </p>
-                  ))}
-                </div>
-                <p className="mt-2.5 text-[10.5px] leading-[1.7] t-faint">
-                  {isCharacter
-                    ? '구체적인 관계 해석·끌림 포인트·갈등 주의점은 심층 리포트에서 확인할 수 있어.'
-                    : '구체적인 관계 해석·끌림 포인트·갈등 주의점은 심층 리포트에서 확인하세요.'}
-                </p>
+              <div className="mt-4">
+                <FreeOpenMeter
+                  freePercent={30}
+                  onDark={false}
+                  openItems={['궁합 점수', '한 줄 케미', '두 사람 수호별']}
+                  lockedItems={[
+                    '왜 이 조합이 이렇게 흘러가는지',
+                    '끌림 포인트와 살리는 법',
+                    '반복되는 부딪힘과 넘는 법',
+                    '함께할 때의 역할 나누기',
+                  ]}
+                  volume="한 번 결제로 관계 해석 전체가 열려"
+                  product={compatProduct}
+                />
               </div>
 
               <button

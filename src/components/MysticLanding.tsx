@@ -6,6 +6,7 @@ import BirthForm from './BirthForm';
 import SystemTabs from './SystemTabs';
 import WesternLanding from './WesternLanding';
 import NewYearBanner from './NewYearBanner';
+import PriceTag from './PriceTag';
 import { SectionLabel, StarMark } from './ui';
 
 type Props = {
@@ -397,15 +398,8 @@ export default function MysticLanding({ onSubmit, onSample, onProduct, onNewYear
               </div>
               <p className={`mt-1.5 text-[11.5px] ${p.recommended ? 't-panel-body' : 't-muted'}`}>{p.tagline}</p>
 
-              <div className="mt-5 flex items-baseline gap-2">
-                <span className={`num text-[24px] font-semibold ${p.recommended ? 't-panel-title' : 't-title'}`}>
-                  {p.price.toLocaleString('ko-KR')}원
-                </span>
-                {p.originalPrice && (
-                  <span className={`num text-[11px] line-through ${p.recommended ? 't-panel-faint' : 't-faint'}`}>
-                    {p.originalPrice.toLocaleString('ko-KR')}원
-                  </span>
-                )}
+              <div className="mt-5">
+                <PriceTag product={p} variant="card" onDark={!!p.recommended} />
               </div>
 
               <ul className={`mt-4 flex-1 space-y-2 text-[12px] leading-relaxed ${p.recommended ? 't-panel-body' : 't-muted'}`}>

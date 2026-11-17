@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ChartModel, PalaceView } from '../lib/chart';
 import { buildTeaser, deepProfileOf, palaceScore, profileOf } from '../lib/content';
-import { CHARACTER_FIRST_PRICE, PRODUCTS, WESTERN_PRODUCTS, ZIWEI_PRODUCTS, findProduct, productBadge, productPoints, productPrice, productScopeShort, productShortCta, productTagline, type ProductId } from '../lib/products';
+import { CHARACTER_FIRST_PRICE, PRODUCTS, WESTERN_PRODUCTS, ZIWEI_PRODUCTS, findProduct, productBadge, productPoints, productPrice, productScopeShort, productShortCta, productTagline, productUnlockCta, type ProductId } from '../lib/products';
 import type { SystemId } from '../lib/systems';
 import { MUTAGEN_HINT, STAR_HANJA } from '../lib/terms';
 import { THEME_ART, useTheme } from '../lib/theme';
@@ -13,6 +13,7 @@ import ChartBoard from './ChartBoard';
 import PalaceDetail from './PalaceDetail';
 import SystemTabs from './SystemTabs';
 import NewYear2027 from './NewYear2027';
+import FreeOpenMeter from './FreeOpenMeter';
 import { ArrowIcon, LockIcon, SectionLabel, StarMark } from './ui';
 
 type Props = {
@@ -659,6 +660,26 @@ export default function ChartView({
                 </span>
               </div>
 
+              <div className="mt-5">
+                <FreeOpenMeter
+                  freePercent={30}
+                  openItems={[
+                    isCharacter ? '수호별과 성격의 결' : '명궁 주성과 성격의 결',
+                    isCharacter ? '연애·금전·일 별빛 지수' : '재물·연애·일 지수',
+                    isCharacter ? '12개 별방 지도' : '12궁 명반 지도',
+                    isCharacter ? '올해 조심할 별방 한 줄' : '올해 조심할 궁 한 줄',
+                  ]}
+                  lockedItems={[
+                    isCharacter ? '배우자상 · 끌리는 타입' : '배우자상',
+                    isCharacter ? '돈이 새는 장면' : '돈이 새는 구체적 상황',
+                    isCharacter ? '12개 별방 전체 해설' : '12궁 전체 해설',
+                    isCharacter ? '달마다 별 처방 12개' : '월별 액션 가이드 12개',
+                  ]}
+                  volume={isCharacter ? '한 번 결제로 12개 별방 · 달마다 처방까지 전부 열려' : '한 번 결제로 12궁 전체 · 월별 가이드까지 전부 열립니다'}
+                  product={findProduct('premium')}
+                />
+              </div>
+
               <div className="mt-7 grid gap-3.5 sm:grid-cols-2">
                 {[
                   { label: isCharacter ? '금전의 별방' : '재물', text: teaser.money, score: moneyScore },
@@ -680,7 +701,7 @@ export default function ChartView({
               <div className="mt-6 flex flex-col items-start justify-between gap-4 pt-5 sm:flex-row sm:items-center" style={{ borderTop: '1px solid var(--panel-rule)' }}>
                 <p className="text-[11.5px] leading-[1.8] t-panel-body">{copy.chart.teaserNote}</p>
                 <button onClick={() => onUnlock('premium')} className="t-btn t-btn-gold shrink-0 px-5 py-3 text-[12.5px]">
-                  {copy.chart.teaserCta}
+                  {productUnlockCta(findProduct('premium'), theme)}
                   <LockIcon className="h-3.5 w-3.5" />
                 </button>
               </div>

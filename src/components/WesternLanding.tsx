@@ -6,9 +6,8 @@ import {
   WESTERN_PRODUCTS,
   productBadge,
   productCta,
-  productOriginalPrice,
   productPoints,
-  productPrice,
+  productPriceInfo,
   productScopeShort,
   productTagline,
   type ProductId,
@@ -16,6 +15,7 @@ import {
 import { useTheme } from '../lib/theme';
 import BirthForm from './BirthForm';
 import NatalWheel from './NatalWheel';
+import PriceTag from './PriceTag';
 import { SectionLabel, StarMark } from './ui';
 
 type Props = {
@@ -272,13 +272,8 @@ export default function WesternLanding({ onSubmit, onSample, onProduct }: Props)
                 {productBadge(p, theme) && <span className="t-chip !text-[9.5px]">{productBadge(p, theme)}</span>}
               </div>
               <p className="mt-1 text-[11px] t-muted">{productTagline(p, theme)}</p>
-              <div className="mt-3 flex items-baseline gap-1.5">
-                <span className="num text-[20px] font-bold">{productPrice(p, theme).toLocaleString('ko-KR')}원</span>
-                {productOriginalPrice(p, theme) && (
-                  <span className="num text-[10px] line-through t-faint">
-                    {productOriginalPrice(p, theme)!.toLocaleString('ko-KR')}원
-                  </span>
-                )}
+              <div className="mt-3">
+                <PriceTag product={p} variant="card" />
               </div>
               <ul className="mt-3 flex-1 space-y-1.5 text-[11px] leading-relaxed t-muted">
                 {productPoints(p, theme).slice(0, 4).map((pt) => (

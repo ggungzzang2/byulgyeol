@@ -3,16 +3,18 @@ import type { BirthInput, Gender } from '../lib/chart';
 import type { Product, ProductId } from '../lib/products';
 import {
   PRODUCTS,
-  productOriginalPrice,
   productPoints,
   productPrice,
+  productPriceInfo,
   productScopeNote,
   productSystemLabel,
   productTagline,
+  won,
 } from '../lib/products';
 import type { ProductSystem } from '../lib/systems';
 import { TIME_OPTIONS } from '../lib/terms';
 import { useTheme } from '../lib/theme';
+import PriceTag from './PriceTag';
 import { LockIcon } from './ui';
 
 type Props = {
@@ -188,7 +190,7 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
             <div className="mt-2 space-y-1.5">
               {laneProducts.map((p) => {
                 const active = p.id === product.id;
-                const price = productPrice(p, theme);
+                const info = productPriceInfo(p, theme);
                 return (
                   <button
                     key={p.id}
@@ -208,8 +210,21 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
                       </span>
                       <span className="mt-0.5 block truncate text-[9.5px] t-faint">{p.tagline}</span>
                     </span>
-                    <span className="num shrink-0 text-[11.5px] font-semibold" style={{ color: active ? 'var(--accent-deep)' : 'var(--muted)' }}>
-                      {price.toLocaleString('ko-KR')}원
+                    <span className="shrink-0 text-right">
+                      {info.discounted && (
+                        <span
+                          className="num block text-[8.5px] font-bold leading-none"
+                          style={{ color: active ? 'var(--accent-deep)' : 'var(--muted)' }}
+                        >
+                          {info.rate}% 할인
+                        </span>
+                      )}
+                      <span
+                        className="num mt-0.5 block text-[11.5px] font-semibold leading-none"
+                        style={{ color: active ? 'var(--accent-deep)' : 'var(--muted)' }}
+                      >
+                        {won(info.price)}원
+                      </span>
                     </span>
                   </button>
                 );
@@ -236,20 +251,30 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
               <span className="t-body">{copy.checkout.periodValue}</span>
             </div>
             <div className="my-1 h-px" style={{ background: 'var(--line)' }} />
-            <div className="flex items-end justify-between">
-              <span className="t-muted">{copy.checkout.amount}</span>
-              <span className="flex items-baseline gap-1.5">
-                {productOriginalPrice(product, theme) && (
-                  <span className="num text-[10px] line-through t-faint">
-                    {productOriginalPrice(product, theme)!.toLocaleString('ko-KR')}원
-                  </span>
-                )}
-                <span className="text-[17px] font-bold t-title">
-                  {productPrice(product, theme).toLocaleString('ko-KR')}
-                  <span className="ml-0.5 text-[11px] font-normal t-muted">원</span>
-                </span>
-              </span>
+            <div className="flex items-start justify-between gap-3">
+              <span className="shrink-0 pt-1 t-muted">{copy.checkout.amount}</span>
+              <PriceTag product={product} variant="inline" align="right" />
             </div>
+          </div>
+
+          {/* 스텔로그 벤치마킹: 구매 전에 '열면 무엇이 먼저 보이는지' 세 가지로 약속 */}
+          <div className="mt-3 rounded-2xl p-4" style={{ background: 'var(--accent-soft)', border: '1px solid var(--line-strong)' }}>
+            <p className="text-[10.5px] font-semibold tracking-[0.06em]" style={{ color: 'var(--accent-deep)' }}>
+              {isCharacter ? '열면 이 세 가지가 먼저 보여' : '열면 이 세 가지가 먼저 보입니다'}
+            </p>
+            <ol className="mt-2 space-y-1.5">
+              {productPoints(product, theme).slice(0, 3).map((pt, i) => (
+                <li key={pt} className="flex gap-2 text-[11.5px] leading-[1.7] t-body">
+                  <span className="num shrink-0 pt-[1px] text-[9.5px] font-semibold" style={{ color: 'var(--accent-deep)' }}>
+                    0{i + 1}
+                  </span>
+                  {pt}
+                </li>
+              ))}
+            </ol>
+            <p className="mt-2 text-[10px] leading-[1.6] t-faint">
+              무료로 본 30%에 이어서, 나머지 70%가 열립니다.
+            </p>
           </div>
 
           {productScopeNote(product, theme) && (

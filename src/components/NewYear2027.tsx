@@ -2,8 +2,9 @@ import { useState } from 'react';
 import type { ChartModel } from '../lib/chart';
 import { amuletShareText, build2027 } from '../lib/newyear2027';
 import { downloadAmulet, renderAmulet2027 } from '../lib/amuletCard';
-import { findProduct, productPrice } from '../lib/products';
+import { findProduct, productPrice, productUnlockCta } from '../lib/products';
 import { useTheme } from '../lib/theme';
+import FreeOpenMeter from './FreeOpenMeter';
 import StoneGoods2027 from './StoneGoods2027';
 import { ArrowIcon, LockIcon, SectionLabel } from './ui';
 
@@ -241,13 +242,19 @@ export default function NewYear2027({ chart, unlocked, onUnlock }: Props) {
           <div className="relative">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[9.5px] tracking-[0.2em] t-panel-accent">2027 FLOW · 핵심 흐름</p>
-              <span
-                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9.5px]"
-                style={{ border: '1px dashed var(--panel-rule)', color: 'var(--panel-text)' }}
-              >
-                <LockIcon className="h-2.5 w-2.5" />
-                무료 공개 30%
+              <span className="text-[9.5px]" style={{ color: 'var(--panel-faint)' }}>
+                무료 부적 + 미리보기
               </span>
+            </div>
+
+            <div className="mt-3">
+              <FreeOpenMeter
+                freePercent={30}
+                openItems={['2027 유년 명궁과 사화', '연애·금전·일 별빛 지수', '1~3월 흐름', '무료 신년 부적 카드']}
+                lockedItems={['4~12월 아홉 달의 문', '부족한 기운과 보완 습관 셋', '수호 원석 처방', '월별로 할 일 한 줄']}
+                volume="한 번 결제로 열두 달 전체가 열려"
+                product={findProduct('newyear2027')}
+              />
             </div>
 
             <p className="t-panel-title mt-3 text-[17px] leading-[1.6]">{content.headline}</p>
@@ -322,8 +329,7 @@ export default function NewYear2027({ chart, unlocked, onUnlock }: Props) {
                   <LockIcon className="h-3.5 w-3.5" />
                   {isCharacter
                     ? `${price.toLocaleString('ko-KR')}원으로 2027 열두 달 열기`
-                    : `2027 정밀 운세 리포트 ${price.toLocaleString('ko-KR')}원`}
-                </>
+                    : `2027 정밀 운세 리포트 ${price.toLocaleString('ko-KR')}원`}                </>
               )}
             </button>
             <p className="mt-2 text-[10px] leading-[1.7] t-panel-faint">

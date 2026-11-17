@@ -52,6 +52,7 @@ export const PRODUCTS: Product[] = [
     name: '두 사람 자미두수 궁합',
     hanja: '緣分 合婚',
     price: 9900,
+    originalPrice: 12900,
     tagline: '우리가 오래 가는 조건',
     points: ['두 사람 명반 비교', '감정·생활·장기 궁합 지수', '부딪히는 지점과 넘는 법', '함께할 때의 최적 역할 분담'],
   },
@@ -160,6 +161,46 @@ export function productOriginalPrice(product: Product, theme: ThemeId): number |
   if (theme === 'character' && product.id === 'western') return 6900;
   if (theme === 'character' && product.id === 'bundle') return 16800;
   return product.originalPrice;
+}
+
+export type PriceInfo = {
+  /** 지금 결제 금액 */
+  price: number;
+  /** 정가 — 할인가가 없으면 결제 금액과 같습니다 */
+  original: number;
+  /** 정가 대비 할인율(%) — 소수점은 반올림 */
+  rate: number;
+  /** 아끼는 금액 */
+  save: number;
+  /** 할인 표기를 쓸지 (정가 > 결제가) */
+  discounted: boolean;
+};
+
+/**
+ * 스텔로그 벤치마킹(2026-11-17): 상품마다 '정가 → 할인가 → 할인율 → 아끼는 금액'을
+ * 한 곳에서 계산해 랜딩·결과·결제 모달이 같은 숫자를 말하게 합니다.
+ */
+export function productPriceInfo(product: Product, theme: ThemeId): PriceInfo {
+  const price = productPrice(product, theme);
+  const original = productOriginalPrice(product, theme) ?? price;
+  const save = Math.max(0, original - price);
+  const discounted = save > 0;
+  const rate = discounted ? Math.round((save / original) * 100) : 0;
+  return { price, original, rate, save, discounted };
+}
+
+/** 숫자 → '3,900' (원 단위 표기는 컴포넌트에서 붙입니다) */
+export function won(value: number): string {
+  return value.toLocaleString('ko-KR');
+}
+
+/**
+ * '무료 공개 30%' 뒤에 남은 몫을 여는 결제 버튼 문구.
+ * 모든 해금 지점에서 같은 공식을 씁니다: {가격}원으로 나머지 {70}% 열기.
+ */
+export function productUnlockCta(product: Product, theme: ThemeId, freePercent = 30): string {
+  const { price } = productPriceInfo(product, theme);
+  return `${won(price)}원으로 나머지 ${100 - freePercent}% 열기`;
 }
 
 export function productTagline(product: Product, theme: ThemeId): string {

@@ -6,9 +6,8 @@ import {
   ZIWEI_PRODUCTS,
   productBadge,
   productCta,
-  productOriginalPrice,
   productPoints,
-  productPrice,
+  productPriceInfo,
   productScopeShort,
   productTagline,
   type ProductId,
@@ -19,6 +18,7 @@ import BirthForm from './BirthForm';
 import SystemTabs from './SystemTabs';
 import WesternLanding from './WesternLanding';
 import NewYearBanner from './NewYearBanner';
+import PriceTag from './PriceTag';
 import { SectionLabel, StarMark } from './ui';
 
 type Props = {
@@ -116,6 +116,10 @@ function LuckRing({ score }: { score: number }) {
 
 export default function CharacterLanding({ onSubmit, onSample, onProduct, onNewYear, system, onSystemChange }: Props) {
   const { copy } = useTheme();
+  const shownRates = [...ZIWEI_PRODUCTS, ...WESTERN_PRODUCTS]
+    .map((p) => productPriceInfo(p, 'character'))
+    .filter((info) => info.discounted)
+    .map((info) => info.rate);
 
   return (
     <div id="top">
@@ -345,6 +349,14 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct, onNewY
           <b className="font-semibold text-[#7c59cf]">커피 한 잔 값({CHARACTER_FIRST_PRICE.toLocaleString('ko-KR')}원)</b>이야.
           가볍게 시작하고, 더 궁금할 때만 다음 책을 펼쳐.
         </p>
+        <p className="mt-2 inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full px-3 py-1.5 text-[10.5px] text-[#6a5788]" style={{ background: 'rgba(237,227,255,0.7)' }}>
+          <span aria-hidden="true">✧</span>
+          모든 별 이야기 정가 대비{' '}
+          <b className="font-semibold text-[#7c59cf]">
+            {Math.min(...shownRates)}~{Math.max(...shownRates)}%
+          </b>{' '}
+          할인 · 결제 전에 <b className="font-semibold text-[#7c59cf]">무료로 30%</b> 먼저 읽어
+        </p>
 
         <div className="mt-5 space-y-6">
           {[
@@ -384,13 +396,8 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct, onNewY
               <p className="mt-1.5 text-[11px]" style={{ color: p.recommended ? 'rgba(255,249,255,0.88)' : '#6a5788' }}>
                 {productTagline(p, 'character')}
               </p>
-              <div className="mt-4 flex items-baseline gap-1.5">
-                <span className="num text-[21px] font-bold">{productPrice(p, 'character').toLocaleString('ko-KR')}원</span>
-                {productOriginalPrice(p, 'character') && (
-                  <span className="num text-[10px] line-through" style={{ color: p.recommended ? 'rgba(255,249,255,0.8)' : '#8f81a8' }}>
-                    {productOriginalPrice(p, 'character')!.toLocaleString('ko-KR')}원
-                  </span>
-                )}
+              <div className="mt-4">
+                <PriceTag product={p} variant="card" onDark={!!p.recommended} />
               </div>
               {p.id === 'basic' && (
                 <p className="mt-1 text-[10px] text-[#b07ac9]">☕ 커피 한 잔 값, 부담 없이 시작해</p>

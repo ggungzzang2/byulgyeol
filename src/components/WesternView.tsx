@@ -7,12 +7,13 @@ import {
   houseReading,
   westernIdentityLines,
 } from '../lib/western';
-import { WESTERN_PRODUCTS, productBadge, productCta, productPoints, productPrice, productShortCta, productTagline, type ProductId } from '../lib/products';
+import { WESTERN_PRODUCTS, productBadge, productCta, productPoints, productPrice, productShortCta, productTagline, productUnlockCta, won, type ProductId } from '../lib/products';
 import { useTheme } from '../lib/theme';
 import NatalWheel from './NatalWheel';
 import SystemTabs from './SystemTabs';
+import FreeOpenMeter from './FreeOpenMeter';
 import type { SystemId } from '../lib/systems';
-import { SectionLabel, StarMark } from './ui';
+import { LockIcon, SectionLabel, StarMark } from './ui';
 
 type Props = {
   model: WesternModel;
@@ -386,6 +387,16 @@ export default function WesternView({ model, onSystemChange, onReset, onUnlock, 
                 전체, 금전·연애·일 지수의 근거는 서양 점성술 리포트에서 이어집니다.
               </p>
 
+              <div className="mt-4">
+                <FreeOpenMeter
+                  freePercent={30}
+                  openItems={['태양 · 달 · 어센던트', '행성 7개의 별자리', '금전·연애·일 지수', '주요 각 하이라이트']}
+                  lockedItems={['12하우스별 삶의 영역 풀이', '행성 교차 각 전체 해석', '지수를 만든 근거', '올해 흐름과 월별 가이드']}
+                  volume="한 번 결제로 12하우스 전체 · 각 해석까지 열립니다"
+                  product={WESTERN_PRODUCTS[0]}
+                />
+              </div>
+
               <div className="mt-4 grid gap-2">
                 {model.houses.slice(0, 2).map((h) => (
                   <p key={h.index} className="select-none rounded-xl px-3 py-2 text-[11.5px] leading-[1.8] blur-[4px]" style={{ border: '1px solid var(--panel-rule)', color: 'var(--panel-body)' }} aria-hidden="true">
@@ -394,12 +405,13 @@ export default function WesternView({ model, onSystemChange, onReset, onUnlock, 
                 ))}
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-5 flex flex-wrap items-center gap-2">
                 <button onClick={() => onUnlock('western')} className="t-btn t-btn-gold px-5 py-3 text-[12.5px]">
-                  서양 점성술 리포트 열기 · {productPrice(WESTERN_PRODUCTS[0], theme).toLocaleString('ko-KR')}원
+                  <LockIcon className="h-3.5 w-3.5" />
+                  {productUnlockCta(WESTERN_PRODUCTS[0], theme)}
                 </button>
                 <button onClick={() => onUnlock('bundle')} className="t-btn t-btn-onpanel px-4 py-3 text-[11.5px]">
-                  동양 + 서양 통합으로 보기
+                  동양 + 서양 통합으로 보기 · {won(productPrice(WESTERN_PRODUCTS.find((p) => p.id === 'bundle')!, theme))}원
                 </button>
               </div>
             </div>

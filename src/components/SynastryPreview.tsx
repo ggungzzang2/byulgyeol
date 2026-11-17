@@ -3,9 +3,10 @@ import type { BirthInput, Gender } from '../lib/chart';
 import type { WesternModel } from '../lib/western';
 import { buildWestern } from '../lib/western';
 import { synastryOf } from '../lib/synastry';
-import { findProduct, productOriginalPrice, productPrice } from '../lib/products';
+import { findProduct, productPrice, won } from '../lib/products';
 import { TIME_OPTIONS } from '../lib/terms';
 import { useTheme } from '../lib/theme';
+import FreeOpenMeter from './FreeOpenMeter';
 import { LockIcon, StarMark } from './ui';
 
 type Props = {
@@ -30,7 +31,7 @@ export default function SynastryPreview({ model, onUpgrade, onClose }: Props) {
   const { theme } = useTheme();
   const isCharacter = theme === 'character';
   const product = findProduct('synastry');
-  const price = productPrice(product, theme).toLocaleString('ko-KR');
+  const price = won(productPrice(product, theme));
 
   const [name, setName] = useState('');
   const [year, setYear] = useState('');
@@ -273,7 +274,7 @@ export default function SynastryPreview({ model, onUpgrade, onClose }: Props) {
                 </div>
                 <div className="min-w-0 text-center sm:text-left">
                   <p className="text-[10px] tracking-[0.16em]" style={{ color: 'var(--accent-deep)' }}>
-                    무료 결과 · 30% 공개
+                    무료 공개 30% · 나머지 70%는 심층에서
                   </p>
                   <h4 className="t-title mt-1.5 text-[17px] leading-snug">
                     {syn.headline}
@@ -319,40 +320,26 @@ export default function SynastryPreview({ model, onUpgrade, onClose }: Props) {
               </div>
 
               {/* 잠긴 심층 */}
-              <div className="mt-4 rounded-2xl p-4" style={{ border: '1px dashed var(--line-strong)' }}>
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[10.5px] font-semibold tracking-[0.06em] t-muted">
-                    심층 시너스트리에서 이어지는 이야기
-                  </p>
-                  <LockIcon className="h-3.5 w-3.5 t-faint" />
-                </div>
-                <div className="mt-2 space-y-1.5">
-                  {[
-                    `나머지 교차 각 ${syn.locked.length}개 — 행성끼리 어디서 붙고 어디서 부딪히는지`,
-                    '관계 역학 — 겉으로 보이는 온도와 쉴 때의 모습',
-                    '갈등 포인트 — 반복되는 장면과 넘는 법',
-                    '보완 조언 — 역할 나누기와 감정의 타이밍',
-                  ].map((line) => (
-                    <p key={line} className="select-none text-[11.5px] leading-[1.7] blur-[3.5px] t-muted" aria-hidden="true">
-                      {line}
-                    </p>
-                  ))}
-                </div>
-                <p className="mt-2.5 text-[10.5px] leading-[1.7] t-faint">
-                  무료 화면에서는 점수와 핵심 각 {syn.core.length}개까지만 열립니다. 나머지 교차 각과 해석은
-                  심층 리포트에 담깁니다.
-                </p>
+              <div className="mt-4">
+                <FreeOpenMeter
+                  freePercent={30}
+                  onDark={false}
+                  openItems={['시너스트리 점수', `핵심 교차 각 ${syn.core.length}개`, '두 사람 태양·달·ASC 좌표']}
+                  lockedItems={[
+                    `나머지 교차 각 ${syn.locked.length}개`,
+                    '관계 역학 — 겉온도와 쉴 때의 모습',
+                    '부딪히는 장면과 넘는 법',
+                    '역할 나누기와 보완 조언',
+                  ]}
+                  volume="한 번 결제로 교차 각 전체 · 관계 해석까지"
+                  product={product}
+                />
               </div>
 
               <button onClick={() => onUpgrade(partnerInput())} className="t-btn t-btn-gold mt-3 w-full py-3 text-[12.5px]">
                 <LockIcon className="h-3.5 w-3.5" />
                 {isCharacter ? `${price}원으로 심층 시너스트리 보기` : `${price}원 결제하고 심층 시너스트리 보기`}
               </button>
-              {productOriginalPrice(product, theme) && (
-                <p className="num mt-1.5 text-center text-[10px] t-faint">
-                  정가 {productOriginalPrice(product, theme)!.toLocaleString('ko-KR')}원 · 프로토타입 결제(실청구 없음)
-                </p>
-              )}
               <button onClick={reset} className="mt-2 w-full text-center text-[11.5px] t-faint">
                 {isCharacter ? '다른 사람으로 다시 보기' : '다른 상대방으로 다시 보기'}
               </button>
