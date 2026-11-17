@@ -278,19 +278,11 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
           </div>
 
           {productScopeNote(product, theme) && (
-            <div className="mt-3 rounded-2xl p-4" style={{ border: '1px dashed var(--line-strong)' }}>
+            <div className="mt-3 rounded-2xl px-4 py-3" style={{ border: '1px dashed var(--line-strong)' }}>
               <p className="text-[10.5px] font-semibold tracking-[0.06em] t-muted">
-                {isCharacter ? '이 이야기에 담기는 것' : '이 리포트에 담기는 것'}
+                {isCharacter ? '이야기 범위' : '리포트 범위'}
               </p>
-              <ul className="mt-2 space-y-1 text-[11.5px] leading-[1.75] t-body">
-                {productPoints(product, theme).map((pt) => (
-                  <li key={pt} className="flex gap-1.5">
-                    <span style={{ color: 'var(--accent)' }}>·</span>
-                    {pt}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-2.5 pt-2.5 text-[10.5px] leading-[1.75] t-faint" style={{ borderTop: '1px solid var(--line)' }}>
+              <p className="mt-1.5 text-[11.5px] leading-[1.75] t-body">
                 {productScopeNote(product, theme)}
               </p>
             </div>

@@ -12,6 +12,7 @@ import { useTheme } from '../lib/theme';
 import NatalWheel from './NatalWheel';
 import SystemTabs from './SystemTabs';
 import FreeOpenMeter from './FreeOpenMeter';
+import PriceTag from './PriceTag';
 import type { SystemId } from '../lib/systems';
 import { LockIcon, SectionLabel, StarMark } from './ui';
 
@@ -441,11 +442,8 @@ export default function WesternView({ model, onSystemChange, onReset, onUnlock, 
                     </li>
                   ))}
                 </ul>
-                <div className="mt-4 flex items-center justify-between gap-2">
-                  <span className="num text-[15px] font-semibold t-title">
-                    {productPrice(p, theme).toLocaleString('ko-KR')}
-                    <span className="ml-0.5 text-[0.72em] font-normal t-muted">원</span>
-                  </span>
+                <div className="mt-4 flex items-end justify-between gap-2">
+                  <PriceTag product={p} variant="compact" />
                   <button onClick={() => onUnlock(p.id)} className="t-btn t-btn-soft !px-3.5 !py-2 text-[11.5px]">
                     {productShortCta(p, theme)}
                   </button>

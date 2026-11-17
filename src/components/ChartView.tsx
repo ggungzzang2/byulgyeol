@@ -14,6 +14,7 @@ import PalaceDetail from './PalaceDetail';
 import SystemTabs from './SystemTabs';
 import NewYear2027 from './NewYear2027';
 import FreeOpenMeter from './FreeOpenMeter';
+import PriceTag from './PriceTag';
 import { ArrowIcon, LockIcon, SectionLabel, StarMark } from './ui';
 
 type Props = {
@@ -651,13 +652,6 @@ export default function ChartView({
                     <span className="opacity-55">{copy.chart.teaserSub}</span>
                   </h2>
                 </div>
-                <span
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10.5px]"
-                  style={{ border: '1px dashed var(--panel-rule)', color: 'var(--panel-text)', background: 'rgba(255,255,255,0.06)' }}
-                >
-                  <LockIcon className="h-2.5 w-2.5" />
-                  {copy.chart.teaserFree}
-                </span>
               </div>
 
               <div className="mt-5">
@@ -778,13 +772,8 @@ export default function ChartView({
                 {productScopeShort(p, theme) && (
                   <p className="mt-2 text-[10px] leading-[1.65] t-faint">{productScopeShort(p, theme)}</p>
                 )}
-                <div className="mt-4 flex items-center justify-between gap-2">
-                  <span className="text-[15px] font-semibold t-title">
-                    <span className="num">
-                      {productPrice(p, theme).toLocaleString('ko-KR')}
-                      <span className="ml-0.5 text-[0.72em] font-normal t-muted">원</span>
-                    </span>
-                  </span>
+                <div className="mt-4 flex items-end justify-between gap-2">
+                  <PriceTag product={p} variant="compact" />
                   <button onClick={() => onUnlock(p.id)} className="t-btn t-btn-soft !px-3.5 !py-2 text-[11.5px]">
                     {productShortCta(p, theme)}
                     <ArrowIcon className="h-3 w-3" />
