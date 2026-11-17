@@ -7,3 +7,4 @@ tmp/
 .env
 .env.local
 .DS_Store
+dist-live/
