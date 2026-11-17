@@ -468,23 +468,7 @@ export default function CharacterLanding({ onSubmit, onSample, onProduct, onNewY
         </>
       )}
 
-      <footer className="mt-10 pb-24 sm:pb-12">
-        <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          <div className="flex items-center gap-2">
-            <span className="guardian-avatar h-7 w-7">
-              <img src={THEME_ART.character.hero} alt="" className="h-full w-full object-cover" />
-            </span>
-            <span className="t-display text-[14px] text-[#6b568c]">{copy.brand.name}</span>
-            <span className="text-[10px] text-[#c9b6e4]">✧</span>
-          </div>
-          <p className="mt-2 text-[10.5px] leading-[1.9] text-[#75628f]">
-            {system === 'western'
-              ? '서양 점성술은 오락과 자기 이해를 위한 콘텐츠야. 의료·법률·투자 같은 중요한 결정의 근거로는 쓸 수 없어. 출생지는 서울 기준으로 계산했어.'
-              : '자미두수는 전통 상담 문화야. 이 이야기는 오락과 자기 이해를 위한 콘텐츠이고, 의료·법률·투자 같은 중요한 결정의 근거로는 쓸 수 없어.'}
-            <br />© 2026 {copy.brand.name}. 프로토타입.
-          </p>
-        </div>
-      </footer>
+      {/* 사업자 정보·정책·저작권은 모든 화면 공통 푸터(LegalFooter)가 이어받습니다. */}
     </div>
   );
 }

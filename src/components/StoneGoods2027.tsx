@@ -1,13 +1,18 @@
 import { useState } from 'react';
 import type { StoneGood } from '../lib/newyear2027';
+import { GOODS_CHECKOUT_ENABLED } from '../config/env';
 import { useTheme } from '../lib/theme';
 
-/** 수호 원석 굿즈 — 상세 보기 + 프로토타입 장바구니(실청구 없음) */
+/** 수호 원석 굿즈 — 상세 보기 + 출시 전 장바구니(결제 없음) */
 export default function StoneGoods2027({ goods, needLabel, stoneName }: { goods: StoneGood[]; needLabel: string; stoneName: string }) {
   const { theme } = useTheme();
   const isCharacter = theme === 'character';
   const [openId, setOpenId] = useState<string | null>(null);
   const [cart, setCart] = useState<string[]>([]);
+
+  // 1차 결제 심사용 빌드(VITE_ENABLE_GOODS_CHECKOUT=false)에서는 굿즈 코너를 숨깁니다.
+  // 2027 무료 운세·부적 카드는 그대로 남습니다.
+  if (!GOODS_CHECKOUT_ENABLED) return null;
 
   const toggle = (id: string) => setOpenId((cur) => (cur === id ? null : id));
   const add = (id: string) => setCart((cur) => (cur.includes(id) ? cur : [...cur, id]));
@@ -23,7 +28,7 @@ export default function StoneGoods2027({ goods, needLabel, stoneName }: { goods:
             {isCharacter ? `${needLabel.split(' · ')[0]} 기운을 채우는 작은 것들` : `${needLabel.split(' · ')[0]}의 기운을 곁에 두는 법`}
           </h3>
         </div>
-        <span className="t-chip !text-[10px]">프로토타입 · 실제 결제 없음</span>
+        <span className="t-chip !text-[10px]">정식 출시 준비 중</span>
       </div>
 
       <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
@@ -80,8 +85,8 @@ export default function StoneGoods2027({ goods, needLabel, stoneName }: { goods:
       <div className="mt-2.5 flex flex-col gap-1.5 rounded-xl px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between" style={{ background: 'var(--field-bg)', border: '1px dashed var(--line-strong)' }}>
         <p className="text-[10.5px] leading-[1.7] t-muted">
           {inCart.length === 0
-            ? '출시 전이라 지금은 장바구니에만 담깁니다. 실제 결제·배송은 일어나지 않습니다.'
-            : `프로토타입 장바구니 ${inCart.length}점 · 합계 ${total.toLocaleString('ko-KR')}원 · 실제 결제는 일어나지 않습니다.`}
+            ? '출시 전이라 지금은 장바구니에 담아 두는 단계입니다. 결제와 배송은 진행되지 않습니다.'
+            : `장바구니 ${inCart.length}점 · 합계 ${total.toLocaleString('ko-KR')}원 · 지금은 결제가 진행되지 않습니다.`}
         </p>
         <p className="text-[10px] t-faint">스마트스토어 연동 준비 중 · 출시 알림은 리포트 열 때 안내</p>
       </div>

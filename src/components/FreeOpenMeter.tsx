@@ -18,7 +18,7 @@ type Props = {
   /** 있으면 해금 버튼을 이 안에서 렌더 */
   onCta?: () => void;
   ctaLabel?: string;
-  /** 버튼 아래 한 줄 (프로토타입 안내 등) */
+  /** 버튼 아래 한 줄 (결제·열람 안내 등) */
   note?: string;
   onDark?: boolean;
 };

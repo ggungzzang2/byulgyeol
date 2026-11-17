@@ -1,12 +1,16 @@
 {
   "name": "byulgyeol-ziwei-app",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort"
+    "build:pages": "VITE_BASE_PATH=/ VITE_ENABLE_GOODS_CHECKOUT=false npm run build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "worker:typecheck": "tsc -p workers/tsconfig.json",
+    "worker:dev": "npm --prefix workers run dev",
+    "worker:deploy": "npm --prefix workers run deploy"
   },
   "dependencies": {
     "iztro": "2.6.5",

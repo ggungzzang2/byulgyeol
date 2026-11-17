@@ -86,6 +86,8 @@ export type ThemeCopy = {
     method: string;
     agree: string;
     note: string;
+    /** 결제 연동 전(미리보기 빌드)에 보여 줄 안내 */
+    previewNote: string;
     cancel: string;
     pay: (price: string) => string;
     processing: string;
@@ -102,7 +104,7 @@ export type ThemeCopy = {
 };
 
 const MYSTIC: ThemeCopy = {
-  brand: { name: '자미원', hanja: '紫微垣', en: 'JA MI WON', line: '천문이 알고, 운명이 말하다' },
+  brand: { name: '자미원', hanja: '紫微垣', en: 'JA MI WON', line: '천문이 읽고, 별이 말하다' },
   nav: { chart: '명반', reports: '세 개의 문', guide: '안내' },
   headerCta: '무료로 명반 보기',
   form: {
@@ -168,7 +170,7 @@ const MYSTIC: ThemeCopy = {
     monthlyTitle: '달마다 하나씩',
     monthlyDesc: '흐름이 열리는 달, 결정을 미룰 달을 미리 표시했습니다.',
     summary: '한 문장으로 정리하면',
-    upgradeNote: '이미 결제한 금액은 그대로 사용됩니다 (프로토타입)',
+    upgradeNote: '이미 결제한 금액은 그대로 사용됩니다.',
   },
   checkout: {
     eyebrow: '결제 확인',
@@ -177,8 +179,9 @@ const MYSTIC: ThemeCopy = {
     amount: '결제 금액',
     partner: '상대방 정보',
     method: '결제 수단',
-    agree: '테스트 체험 결제임을 확인했고, 결제 후 디지털 콘텐츠가 즉시 제공되어 청약 철회가 제한됨에 동의합니다.',
-    note: '프로토타입 결제입니다. 실제 금액은 청구되지 않으며, 결제 버튼을 누르면 잠금이 해제된 리포트가 열립니다.',
+    agree: '디지털 콘텐츠가 즉시 제공되어 청약 철회가 제한됨을 확인했고, 이에 동의합니다.',
+    note: '결제는 페이앱(PayApp)을 통해 처리됩니다. 결제가 확인되면 잠긴 리포트가 바로 열리고, 거래 내역은 결제 시 입력한 휴대폰 번호로 확인할 수 있습니다.',
+    previewNote: '결제 연동 준비 중인 미리보기 화면입니다. 지금은 결제 없이 잠금이 해제된 리포트가 열립니다.',
     cancel: '취소',
     pay: (price) => `${price}원 결제하고 리포트 열기`,
     processing: '결제 확인 중',
@@ -258,7 +261,7 @@ const CHARACTER: ThemeCopy = {
     monthlyTitle: '달마다 하나씩',
     monthlyDesc: '별이 힘을 주는 달, 조금 쉬어갈 달을 미리 표시해 뒀어.',
     summary: '한 문장으로 정리하면',
-    upgradeNote: '이미 결제한 금액은 그대로 쓸 수 있어 (프로토타입)',
+    upgradeNote: '이미 결제한 금액은 그대로 쓸 수 있어.',
   },
   checkout: {
     eyebrow: '별 이야기 열기',
@@ -267,8 +270,9 @@ const CHARACTER: ThemeCopy = {
     amount: '결제 금액',
     partner: '상대방 정보',
     method: '결제 수단',
-    agree: '테스트 체험 결제임을 확인했고, 결제하면 디지털 콘텐츠가 바로 열려 청약 철회가 제한되는 것에 동의해.',
-    note: '프로토타입 결제야. 실제로 돈은 나가지 않고, 결제 버튼을 누르면 잠긴 이야기가 열려!',
+    agree: '결제하면 디지털 콘텐츠가 바로 열리고, 그때부터 청약 철회가 제한되는 것에 동의해.',
+    note: '결제는 페이앱(PayApp)을 통해 안전하게 처리돼. 결제가 끝나면 잠긴 이야기가 바로 열리고, 거래 내역은 결제할 때 적은 번호로 확인할 수 있어.',
+    previewNote: '지금은 결제 연결 전 미리보기 화면이야. 결제 없이 잠긴 이야기가 열려.',
     cancel: '그만두기',
     pay: (price) => `${price}원 결제하고 내 별 이야기 열기`,
     processing: '결제 확인 중',

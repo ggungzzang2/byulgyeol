@@ -14,12 +14,18 @@ import {
 import type { ProductSystem } from '../lib/systems';
 import { TIME_OPTIONS } from '../lib/terms';
 import { useTheme } from '../lib/theme';
+import { PAYMENTS_LIVE } from '../config/env';
+import { LEGAL_LINK_LABEL, LEGAL_ORDER, type LegalDocId } from '../config/legal';
+import { normalizePhone, requestPayAppPayment, savePendingOrder } from '../lib/payments';
 import PriceTag from './PriceTag';
+import LegalModal from './LegalModal';
 import { LockIcon } from './ui';
 
 type Props = {
   product: Product;
   chartName: string;
+  /** 결제 후 페이앱에서 돌아왔을 때 리포트를 다시 그리기 위한 입력값 */
+  birthInput?: BirthInput | null;
   /** 궁합 무료 프리뷰에서 넘어온 상대방 정보 — 있으면 미리 채워 둡니다. */
   initialPartner?: BirthInput | null;
   onClose: () => void;
@@ -36,12 +42,13 @@ const LANES: Array<{ key: ProductSystem; label: string; sub: string; glyph: stri
   { key: 'both', label: '통합 (둘 다)', sub: '두 리포트 함께', glyph: '✦' },
 ];
 
-export default function CheckoutModal({ product, chartName, initialPartner, onClose, onPaid, onSelect }: Props) {
+export default function CheckoutModal({ product, chartName, birthInput, initialPartner, onClose, onPaid, onSelect }: Props) {
   const { theme, copy } = useTheme();
   const isCharacter = theme === 'character';
   const [agree, setAgree] = useState(false);
   const [stage, setStage] = useState<'form' | 'processing' | 'done'>('form');
-  const [method, setMethod] = useState<'card' | 'kakao' | 'naver'>('card');
+  const [phone, setPhone] = useState('');
+  const [policy, setPolicy] = useState<LegalDocId | null>(null);
 
   const [pName, setPName] = useState(initialPartner?.name ?? '');
   const [pYear, setPYear] = useState(initialPartner ? String(initialPartner.year) : '');
@@ -79,7 +86,22 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
     if (first) onSelect(first.id);
   };
 
-  const pay = () => {
+  const partnerInput = (): BirthInput | undefined =>
+    product.id === 'compat' || product.id === 'synastry'
+      ? {
+          name: pName,
+          year: Number(pYear),
+          month: Number(pMonth),
+          day: Number(pDay),
+          calendar: 'solar',
+          isLeap: false,
+          timeIndex: pTime === 'unknown' ? 6 : Number(pTime),
+          timeKnown: pTime !== 'unknown',
+          gender: pGender,
+        }
+      : undefined;
+
+  const pay = async () => {
     if (!agree) {
       setError(isCharacter ? '동의 체크를 먼저 눌러줘!' : '결제 진행에 동의해 주세요.');
       return;
@@ -88,26 +110,53 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
       setError(isCharacter ? '상대방의 태어난 날도 알려줘!' : '상대방의 생년월일을 입력해 주세요.');
       return;
     }
+
+    // 실제 결제 빌드: 휴대폰 번호가 있어야 페이앱 결제 요청을 만들 수 있습니다.
+    if (PAYMENTS_LIVE) {
+      const normalized = normalizePhone(phone);
+      if (!normalized) {
+        setError(
+          isCharacter
+            ? '결제 확인에 쓸 휴대폰 번호를 정확히 적어줘. (예: 010-1234-5678)'
+            : '결제 확인에 필요한 휴대폰 번호를 정확히 입력해 주세요. (예: 010-1234-5678)',
+        );
+        return;
+      }
+      setError(null);
+      setStage('processing');
+      try {
+        const started = await requestPayAppPayment({
+          productId: product.id,
+          theme,
+          recvphone: normalized,
+          buyerName: chartName || undefined,
+        });
+        if (birthInput) {
+          savePendingOrder({
+            orderId: started.orderId,
+            productId: product.id,
+            theme,
+            price: productPrice(product, theme),
+            input: birthInput,
+            partnerInput: partnerInput() ?? null,
+            createdAt: Date.now(),
+          });
+        }
+        window.location.assign(started.payurl);
+      } catch (err) {
+        setStage('form');
+        setError(err instanceof Error ? err.message : '결제를 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      }
+      return;
+    }
+
+    // 결제 연동 전 미리보기 빌드 — 화면 흐름만 확인합니다.
     setError(null);
     setStage('processing');
     window.setTimeout(() => {
       setStage('done');
       window.setTimeout(() => {
-        onPaid(
-          product.id === 'compat' || product.id === 'synastry'
-            ? {
-                name: pName,
-                year: Number(pYear),
-                month: Number(pMonth),
-                day: Number(pDay),
-                calendar: 'solar',
-                isLeap: false,
-                timeIndex: pTime === 'unknown' ? 6 : Number(pTime),
-                timeKnown: pTime !== 'unknown',
-                gender: pGender,
-              }
-            : undefined,
-        );
+        onPaid(partnerInput());
       }, 650);
     }, 1100);
   };
@@ -344,28 +393,46 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
 
           <div className="mt-4">
             <p className="mb-2 text-[11px] font-semibold tracking-[0.08em] t-muted">{copy.checkout.method}</p>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { id: 'card', label: '카드' },
-                { id: 'kakao', label: '카카오페이' },
-                { id: 'naver', label: '네이버페이' },
-              ].map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setMethod(m.id as typeof method)}
-                  className="rounded-xl px-2 py-2.5 text-[11.5px] font-medium transition"
-                  style={
-                    method === m.id
-                      ? { background: 'var(--accent-soft)', border: '1px solid var(--line-strong)', color: 'var(--accent-deep)' }
-                      : { background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)' }
-                  }
+            <div className="flex flex-wrap gap-1.5">
+              {['신용·체크카드', '카카오페이', '네이버페이'].map((m) => (
+                <span
+                  key={m}
+                  className="rounded-full px-2.5 py-1 text-[10.5px]"
+                  style={{ background: 'var(--field-bg)', border: '1px solid var(--line)', color: 'var(--muted)' }}
                 >
-                  {m.label}
-                </button>
+                  {m}
+                </span>
               ))}
             </div>
+            <p className="mt-1.5 text-[10px] leading-[1.7] t-faint">
+              {PAYMENTS_LIVE
+                ? '결제 수단은 페이앱(PayApp) 결제창에서 선택합니다.'
+                : '결제 수단은 결제 연동 후 페이앱(PayApp) 결제창에서 선택합니다.'}
+            </p>
           </div>
+
+          {PAYMENTS_LIVE && (
+            <div className="mt-4">
+              <label className="mb-2 block text-[11px] font-semibold tracking-[0.08em] t-muted" htmlFor="checkout-phone">
+                {isCharacter ? '결제 확인용 휴대폰 번호' : '결제 확인용 휴대폰 번호'}
+              </label>
+              <input
+                id="checkout-phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                className="t-field num !text-[13px]"
+                placeholder="010-1234-5678"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+              <p className="mt-1.5 text-[10px] leading-[1.7] t-faint">
+                {isCharacter
+                  ? '결제 확인과 거래 내역 안내에만 써. 광고 문자는 보내지 않아.'
+                  : '결제 확인과 거래 내역 안내 목적으로만 사용하며, 광고에는 사용하지 않습니다.'}
+              </p>
+            </div>
+          )}
 
           <label className="mt-4 flex cursor-pointer items-start gap-2 text-[11px] leading-[1.7] t-muted">
             <input
@@ -378,10 +445,26 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
             <span>{copy.checkout.agree}</span>
           </label>
 
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 pl-6">
+            {LEGAL_ORDER.map((id, i) => (
+              <span key={id} className="flex items-center gap-2">
+                {i > 0 && <span className="text-[9px] t-faint">·</span>}
+                <button
+                  type="button"
+                  onClick={() => setPolicy(id)}
+                  className="text-[10.5px] underline decoration-dotted underline-offset-2 t-faint"
+                >
+                  {LEGAL_LINK_LABEL[id]}
+                </button>
+              </span>
+            ))}
+            <span className="text-[10px] t-faint">보기</span>
+          </div>
+
           {error && <p className="mt-2 text-[11.5px]" style={{ color: isCharacter ? '#d97d9a' : '#d98a7a' }}>{error}</p>}
 
           <div className="mt-4 rounded-xl px-3 py-2.5 text-[10.5px] leading-[1.7]" style={{ background: 'var(--accent-soft)', border: '1px dashed var(--line-strong)', color: 'var(--accent-deep)' }}>
-            {copy.checkout.note}
+            {PAYMENTS_LIVE ? copy.checkout.note : copy.checkout.previewNote}
           </div>
         </div>
 
@@ -419,6 +502,8 @@ export default function CheckoutModal({ product, chartName, initialPartner, onCl
           </button>
         </div>
       </div>
+
+      {policy && <LegalModal doc={policy} onClose={() => setPolicy(null)} />}
     </div>
   );
 }

@@ -311,7 +311,7 @@ export default function WesternReport({ model, onBack, onOpenZiwei, onBundle, ha
                 </h3>
                 <p className="mt-3 max-w-[540px] text-[12px] leading-[1.9] t-panel-body">
                   자미두수 12궁과 서양 천궁도가 같은 말을 할 때가 가장 정확한 순간입니다. 통합 리포트는 두 해설을
-                  나란히 놓고 교차해서 읽습니다. 이미 결제한 금액은 그대로 사용됩니다 (프로토타입).
+                  나란히 놓고 교차해서 읽습니다. 이미 결제한 금액은 그대로 사용됩니다.
                 </p>
                 <div className="mt-5 flex flex-wrap items-center gap-3">
                   <button onClick={onBundle} className="t-btn t-btn-gold px-5 py-3 text-[12.5px]">

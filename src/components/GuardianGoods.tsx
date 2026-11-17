@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ChartModel } from '../lib/chart';
 import { guardianRecommendation } from '../lib/guardianGoods';
+import { GOODS_CHECKOUT_ENABLED } from '../config/env';
 import { useTheme } from '../lib/theme';
 import { SectionLabel } from './ui';
 
@@ -26,10 +27,14 @@ export default function GuardianGoods({ chart }: { chart: ChartModel }) {
             )}
           </h2>
         </div>
-        <span className="t-chip !text-[10px]">굿즈 커머스 연동 예정</span>
+        {GOODS_CHECKOUT_ENABLED && <span className="t-chip !text-[10px]">굿즈 커머스 연동 예정</span>}
       </div>
 
-      <div className="mt-4 grid items-start gap-3.5 lg:grid-cols-[0.95fr_1.05fr]">
+      <div
+        className={`mt-4 grid items-start gap-3.5 ${
+          GOODS_CHECKOUT_ENABLED ? 'lg:grid-cols-[0.95fr_1.05fr]' : ''
+        }`}
+      >
         {/* 진단 */}
         <div className="t-panel p-6">
           <div className="t-starfield opacity-30" />
@@ -73,7 +78,8 @@ export default function GuardianGoods({ chart }: { chart: ChartModel }) {
           </div>
         </div>
 
-        {/* 굿즈 */}
+        {/* 굿즈 — 1차 결제 심사용 빌드에서는 추천(처방)만 남기고 상품 진열은 숨깁니다. */}
+        {GOODS_CHECKOUT_ENABLED && (
         <div className="grid gap-2.5 sm:grid-cols-3">
           {rec.goods.map((g) => (
             <div key={g.id} className="t-card flex flex-col p-4">
@@ -94,8 +100,10 @@ export default function GuardianGoods({ chart }: { chart: ChartModel }) {
             </div>
           ))}
         </div>
+        )}
       </div>
 
+      {GOODS_CHECKOUT_ENABLED && (
       <div className="mt-3 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
         <p className="text-[10.5px] leading-relaxed t-faint">
           스마트스토어·굿즈 판매 연동을 준비 중입니다. 지금은 출시 알림만 등록할 수 있어요.
@@ -123,6 +131,7 @@ export default function GuardianGoods({ chart }: { chart: ChartModel }) {
           )}
         </button>
       </div>
+      )}
     </section>
   );
 }

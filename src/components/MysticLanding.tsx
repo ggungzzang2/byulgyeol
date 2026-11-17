@@ -91,7 +91,7 @@ function Hero() {
           </div>
 
           <p className="t-display mt-6 text-[15px] tracking-[0.02em] sm:text-[16px]" style={{ color: 'var(--accent)' }}>
-            천문이 알고, 운명이 말하다
+            천문이 읽고, 별이 말하다
           </p>
           <h1 className="t-display mt-3 text-[34px] leading-[1.28] sm:text-[44px] lg:text-[52px]">
             매번 같은 지점에서
@@ -518,12 +518,7 @@ function MysticFooter({ system }: { system: SystemId }) {
             </div>
           </div>
         </div>
-        <div className="mt-10 border-t pt-6 text-[10.5px] leading-[1.9] t-faint" style={{ borderColor: 'var(--line-soft)' }}>
-          {system === 'western'
-            ? '서양 점성술은 오락과 자기 이해를 위한 콘텐츠이며, 의료·법률·투자 등 중요한 결정의 근거로 사용할 수 없습니다. 출생지는 서울 기준으로 계산했습니다.'
-            : '자미두수는 동아시아 전통 상담 문화입니다. 본 리포트는 오락과 자기 이해를 위한 콘텐츠이며, 의료·법률·투자 등 중요한 결정의 근거로 사용할 수 없습니다.'}
-          <br />© 2026 {copy.brand.name}. 프로토타입.
-        </div>
+        {/* 고지·사업자 정보·정책 3종은 모든 화면 공통 푸터(LegalFooter)가 이어받습니다. */}
       </div>
     </footer>
   );

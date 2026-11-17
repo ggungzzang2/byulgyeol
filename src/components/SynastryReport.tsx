@@ -12,7 +12,7 @@ type Props = {
   onAgain: () => void;
 };
 
-/** 심층 시너스트리 리포트 — 프로토타입 결제 후 열리는 전체 리포트. */
+/** 심층 시너스트리 리포트 — 결제 확인 후 열리는 전체 리포트. */
 export default function SynastryReport({ model, partner, onBack, onAgain }: Props) {
   const { theme } = useTheme();
   const isCharacter = theme === 'character';

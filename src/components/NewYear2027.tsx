@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { ChartModel } from '../lib/chart';
+import { GOODS_CHECKOUT_ENABLED } from '../config/env';
 import { amuletShareText, build2027 } from '../lib/newyear2027';
 import { downloadAmulet, renderAmulet2027 } from '../lib/amuletCard';
 import { findProduct, productPrice, productUnlockCta } from '../lib/products';
@@ -334,16 +335,18 @@ export default function NewYear2027({ chart, unlocked, onUnlock }: Props) {
             </button>
             <p className="mt-2 text-[10px] leading-[1.7] t-panel-faint">
               {isCharacter
-                ? '열두 달 흐름, 달마다 할 일, 보완 처방과 원석 굿즈까지 한 번에 이어져.'
-                : '열두 달 흐름, 달마다 할 일, 보완 처방과 원석 굿즈까지 이어집니다.'}
+                ? '열두 달 흐름, 달마다 할 일, 부족한 기운의 보완 처방까지 한 번에 이어져.'
+                : '열두 달 흐름, 달마다 할 일, 부족한 기운의 보완 처방까지 이어집니다.'}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="mt-8">
-        <StoneGoods2027 goods={content.goods} needLabel={content.needLabel} stoneName={content.stone.name} />
-      </div>
+      {GOODS_CHECKOUT_ENABLED && (
+        <div className="mt-8">
+          <StoneGoods2027 goods={content.goods} needLabel={content.needLabel} stoneName={content.stone.name} />
+        </div>
+      )}
 
       {toast && (
         <div

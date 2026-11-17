@@ -2,6 +2,7 @@ import type { ChartModel } from '../lib/chart';
 import { build2027, type MonthTone } from '../lib/newyear2027';
 import { useTheme } from '../lib/theme';
 import StoneGoods2027 from './StoneGoods2027';
+import { GOODS_CHECKOUT_ENABLED } from '../config/env';
 import { ScoreBar, SectionLabel } from './ui';
 
 const TONE: Record<MonthTone, { label: string; color: string; soft: string }> = {
@@ -216,10 +217,12 @@ export default function NewYearReport({ chart, onBack }: { chart: ChartModel; on
           </div>
         </section>
 
-        {/* 굿즈 */}
-        <section className="mt-10">
-          <StoneGoods2027 goods={content.goods} needLabel={content.needLabel} stoneName={content.stone.name} />
-        </section>
+        {/* 굿즈 — 1차 결제 심사용 빌드에서는 숨깁니다. */}
+        {GOODS_CHECKOUT_ENABLED && (
+          <section className="mt-10">
+            <StoneGoods2027 goods={content.goods} needLabel={content.needLabel} stoneName={content.stone.name} />
+          </section>
+        )}
 
         <section className="mt-10">
           <div className="t-card p-6">

@@ -18,6 +18,16 @@ import SynastryPreview from './components/SynastryPreview';
 import SynastryReport from './components/SynastryReport';
 import NewYearReport from './components/NewYearReport';
 import ThemeToggle from './components/ThemeToggle';
+import LegalFooter from './components/LegalFooter';
+import { PAYMENTS_LIVE } from './config/env';
+import {
+  clearPendingOrder,
+  cleanReturnUrl,
+  fetchOrderStatus,
+  readPendingOrder,
+  readReturnedOrderId,
+  verifyUnlockToken,
+} from './lib/payments';
 
 type View = 'landing' | 'chart' | 'report' | 'compat' | 'western' | 'westernReport' | 'synastry' | 'newyear2027';
 
@@ -26,6 +36,8 @@ export default function App() {
   const [system, setSystemState] = useState<SystemId>(() => readSystemFromUrl());
   const [view, setView] = useState<View>('landing');
   const [chart, setChart] = useState<ChartModel | null>(null);
+  /** 결제 후 돌아왔을 때 리포트를 다시 그리기 위한 입력값 (화면 상태로만 보관) */
+  const [birthInput, setBirthInput] = useState<BirthInput | null>(null);
   const [western, setWestern] = useState<WesternModel | null>(null);
   const [partner, setPartner] = useState<ChartModel | null>(null);
   const [checkout, setCheckout] = useState<Product | null>(null);
@@ -43,7 +55,7 @@ export default function App() {
   const [ziweiTier, setZiweiTier] = useState<'none' | 'basic' | 'premium'>('none');
   const [westernPaid, setWesternPaid] = useState(false);
   const [hasBundle, setHasBundle] = useState(false);
-  /** 2027 정미년 신년 정밀 리포트 열람 여부 (프로토타입 결제) */
+  /** 2027 정미년 신년 정밀 리포트 열람 여부 (결제 후 열림) */
   const [newYearUnlocked, setNewYearUnlocked] = useState(false);
   /** 랜딩의 2027 부적 버튼으로 들어왔을 때 결과 화면에서 부적 섹션으로 이동 */
   const [focusNewYear, setFocusNewYear] = useState(false);
@@ -77,7 +89,7 @@ export default function App() {
         ? '서양 점성술 · 출생 천궁도로 읽는 나의 좌표'
         : theme === 'character'
           ? '별의 속삭임 · 별빛 가디언이 읽어주는 나만의 사용설명서'
-          : '자미원 紫微垣 · 천문이 알고, 운명이 말하다';
+          : '자미원 紫微垣 · 천문이 읽고, 별이 말하다';
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', theme === 'character' ? '#F7EFFF' : '#090812');
     document.documentElement.style.background = theme === 'character' ? '#F7EFFF' : '#090812';
@@ -96,6 +108,7 @@ export default function App() {
     try {
       // 두 체계는 같은 입력에서 동시에 계산됩니다. 화면은 고른 체계만 보여줍니다.
       const [built, west] = await Promise.all([buildChart(input), buildWestern(input)]);
+      setBirthInput(input);
       setChart(built);
       setWestern(west);
       setView(system === 'western' ? 'western' : 'chart');
@@ -171,7 +184,7 @@ export default function App() {
 
   const handleUnlock = (id: ProductId) => {
     setFocusAi(false);
-    // 2027 신년 리포트는 전용 화면으로 이어집니다 (프로토타입 결제 후 바로 열림).
+    // 2027 신년 리포트는 전용 화면으로 이어집니다 (결제 확인 후 바로 열림).
     if (id === 'newyear2027') {
       if (newYearUnlocked) {
         setCheckout(null);
@@ -218,59 +231,134 @@ export default function App() {
     setCheckout(findProduct(theme === 'character' ? 'basic' : 'premium'));
   };
 
+  /**
+   * 결제 확인 후 리포트를 여는 공통 처리.
+   * 페이앱 결제창에서 돌아온 경우(복원)에도 같은 함수를 씁니다.
+   */
+  const applyPaid = useCallback(
+    async (id: ProductId, partnerInput?: BirthInput) => {
+      if (id === 'compat') {
+        if (!partnerInput) return;
+        try {
+          setPartner(await buildChart(partnerInput));
+          setView('compat');
+        } catch {
+          flash('상대방 명반을 계산하지 못했어요. 생년월일을 확인해 주세요.');
+        }
+        return;
+      }
+
+      if (id === 'synastry') {
+        if (!partnerInput) return;
+        try {
+          setPartnerWestern(await buildWestern(partnerInput));
+          setSynastryPaid(true);
+          setView('synastry');
+        } catch {
+          flash('상대방 천궁도를 계산하지 못했어요. 생년월일을 확인해 주세요.');
+        }
+        return;
+      }
+
+      if (id === 'western') {
+        setWesternPaid(true);
+        setSystemState('western');
+        writeSystemToUrl('western');
+        setView('westernReport');
+        return;
+      }
+
+      if (id === 'newyear2027') {
+        setNewYearUnlocked(true);
+        setView('newyear2027');
+        return;
+      }
+
+      if (id === 'bundle') {
+        setHasBundle(true);
+        setWesternPaid(true);
+        setZiweiTier('premium');
+        setView(system === 'western' ? 'westernReport' : 'report');
+        return;
+      }
+
+      setZiweiTier(id === 'basic' ? 'basic' : 'premium');
+      setView('report');
+    },
+    [system, flash],
+  );
+
   const handlePaid = async (partnerInput?: BirthInput) => {
     if (!checkout || !chart) return;
     const id = checkout.id;
     setCheckout(null);
-
-    if (id === 'compat') {
-      if (!partnerInput) return;
-      try {
-        setPartner(await buildChart(partnerInput));
-        setView('compat');
-      } catch {
-        flash('상대방 명반을 계산하지 못했어요. 생년월일을 확인해 주세요.');
-      }
-      return;
-    }
-
-    if (id === 'synastry') {
-      if (!partnerInput) return;
-      try {
-        setPartnerWestern(await buildWestern(partnerInput));
-        setSynastryPaid(true);
-        setView('synastry');
-      } catch {
-        flash('상대방 천궁도를 계산하지 못했어요. 생년월일을 확인해 주세요.');
-      }
-      return;
-    }
-
-    if (id === 'western') {
-      setWesternPaid(true);
-      setSystemState('western');
-      writeSystemToUrl('western');
-      setView('westernReport');
-      return;
-    }
-
-    if (id === 'newyear2027') {
-      setNewYearUnlocked(true);
-      setView('newyear2027');
-      return;
-    }
-
-    if (id === 'bundle') {
-      setHasBundle(true);
-      setWesternPaid(true);
-      setZiweiTier('premium');
-      setView(system === 'western' ? 'westernReport' : 'report');
-      return;
-    }
-
-    setZiweiTier(id === 'basic' ? 'basic' : 'premium');
-    setView('report');
+    await applyPaid(id, partnerInput);
   };
+
+  /**
+   * 페이앱 결제창에서 돌아왔을 때 — 주문 상태를 확인하고 리포트를 엽니다.
+   * 통보(feedback)가 아직 도착하지 않았을 수 있어 몇 차례 다시 확인합니다.
+   */
+  useEffect(() => {
+    if (!PAYMENTS_LIVE) return;
+    let cancelled = false;
+    const pending = readPendingOrder();
+    if (!pending) {
+      cleanReturnUrl();
+      return;
+    }
+
+    const refreshThemeFromUrl = () => {
+      const next = readThemeFromUrl();
+      setThemeState(next);
+    };
+
+    const confirm = async () => {
+      for (let attempt = 0; attempt < 8; attempt += 1) {
+        if (cancelled) return;
+        try {
+          const status = await fetchOrderStatus(pending.orderId);
+          if (cancelled) return;
+          if (status.status === 'canceled') {
+            clearPendingOrder();
+            cleanReturnUrl();
+            flash('결제가 취소되었습니다. 필요하면 다시 결제해 주세요.');
+            return;
+          }
+          if (status.status === 'paid' && status.token) {
+            const verified = await verifyUnlockToken(status.token, pending.productId);
+            if (cancelled) return;
+            if (!verified.valid) {
+              flash('결제는 확인되었지만 열람 권한 확인에 실패했습니다. 고객센터로 문의해 주세요.');
+              return;
+            }
+            const [built, west] = await Promise.all([buildChart(pending.input), buildWestern(pending.input)]);
+            if (cancelled) return;
+            setBirthInput(pending.input);
+            setChart(built);
+            setWestern(west);
+            refreshThemeFromUrl();
+            await applyPaid(pending.productId, pending.partnerInput ?? undefined);
+            clearPendingOrder();
+            cleanReturnUrl();
+            flash('결제가 확인되어 리포트를 열었습니다.');
+            return;
+          }
+        } catch {
+          /* 통보 지연·네트워크 오류 — 다음 차례에 다시 확인합니다. */
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 2500));
+      }
+    };
+
+    if (readReturnedOrderId()) flash('결제를 확인하고 있어요. 잠시만 기다려 주세요.');
+    void confirm();
+    return () => {
+      cancelled = true;
+    };
+    // 결제 복원은 앱이 처음 뜰 때 한 번만 시도합니다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /** 랜딩의 2027 신년 부적 배너 — 명반이 없으면 먼저 입력으로 안내합니다. */
   const handleNewYearFromLanding = () => {
@@ -310,6 +398,7 @@ export default function App() {
             focusNewYear={focusNewYear}
             onFocusNewYearHandled={() => setFocusNewYear(false)}
             onReset={() => {
+              setBirthInput(null);
               setChart(null);
               setWestern(null);
               setPartner(null);
@@ -339,6 +428,7 @@ export default function App() {
             model={western}
             onSystemChange={setSystem}
             onReset={() => {
+              setBirthInput(null);
               setChart(null);
               setWestern(null);
               setPartner(null);
@@ -432,6 +522,7 @@ export default function App() {
           <CheckoutModal
             product={checkout}
             chartName={chart.name}
+            birthInput={birthInput}
             initialPartner={checkout.id === 'compat' ? partnerDraft : checkout.id === 'synastry' ? synastryDraft : null}
             onClose={() => setCheckout(null)}
             onPaid={handlePaid}
@@ -451,6 +542,8 @@ export default function App() {
             {toast}
           </div>
         )}
+
+        <LegalFooter />
 
         <ThemeToggle />
       </div>
