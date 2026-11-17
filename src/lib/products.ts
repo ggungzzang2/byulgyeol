@@ -78,7 +78,7 @@ export const PRODUCTS: Product[] = [
     hanja: '丁未年 年運',
     price: 9900,
     originalPrice: 12900,
-    tagline: '2027 열두 달 흐름 · 사화 넷 · 보완 기운과 수호 원석 처방',
+    tagline: '2027 열두 달 · 보완 기운 · 수호 원석 처방',
     points: [
       '2027 유년 명궁과 사화 네 개의 자리',
       '열두 달마다 무엇을 먼저 할지',
@@ -148,7 +148,7 @@ export function productOriginalPrice(product: Product, theme: ThemeId): number |
 export function productTagline(product: Product, theme: ThemeId): string {
   if (product.id === 'newyear2027') {
     return theme === 'character'
-      ? '2027 열두 달 흐름, 보완 기운, 수호 원석까지 한 번에'
+      ? '열두 달 흐름 · 보완 기운 · 수호 원석까지'
       : '2027년 열두 달의 흐름과 보완 기운, 수호 원석 처방';
   }
   if (theme === 'character' && product.id === 'basic') return '명궁·연애·재물·진로·배우자상 핵심만, 커피 한 잔 값으로';
